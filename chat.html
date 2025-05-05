@@ -3,196 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-translate-key="chat_page_title">Chat General - Pornitoo</title> <link rel="stylesheet" href="style.css">
-
+    <title data-translate-key="chat_page_title">Chat General - Pornitoo</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-
 </head>
 <body>
+
     <header>
-        <div class="header-container">
+         <div class="header-container">
             <a href="index.html" id="header-logo" class="logo">Pornitoo</a>
-            <nav>
-                </nav>
-            <div class="header-actions">
+             <div class="header-actions">
                 <button id="settings-button" class="icon-button" data-tooltip="Configuración" title="Configuración"><i class="fas fa-cog"></i></button>
                 <button id="user-auth-button" class="icon-button" data-tooltip="Iniciar Sesión" title="Iniciar Sesión">
                     <i class="fas fa-user"></i>
-                    </button>
+                </button>
             </div>
         </div>
     </header>
 
     <div id="settings-panel" class="settings-panel">
-        <button id="close-settings-button" class="close-panel-button">×</button>
+         <button id="close-settings-button" class="close-panel-button">×</button>
         <h4>Configuración</h4>
-        <div class="settings-section">
-            <h5>Tema</h5>
-            <div class="theme-swatches">
-                <button class="theme-swatch active" data-theme="green" style="background-color: #00ff00;" title="Verde Neón"></button>
-                <button class="theme-swatch" data-theme="red" style="background-color: #ff1a1a;" title="Rojo Neón"></button>
-                <button class="theme-swatch" data-theme="purple" style="background-color: #9933ff;" title="Púrpura Neón"></button>
-                <button class="theme-swatch" data-theme="blue" style="background-color: #007bff;" title="Azul Neón"></button>
-            </div>
-        </div>
-        <div class="settings-section">
-            <h5>Idioma</h5>
-            <div class="language-buttons">
-                <button class="language-button active" data-lang="es">ES</button>
-                <button class="language-button" data-lang="en">EN</button>
-            </div>
-        </div>
-        <div class="settings-section">
-            <h5><label for="particle-toggle">Partículas</label></h5>
-            <label class="switch">
-                <input type="checkbox" id="particle-toggle" checked>
-                <span class="slider round"></span>
-            </label>
-        </div>
+        <div class="settings-section"><h5>Tema</h5><div class="theme-swatches"><button class="theme-swatch active" data-theme="green" style="background-color: #00ff00;" title="Verde Neón"></button><button class="theme-swatch" data-theme="red" style="background-color: #ff1a1a;" title="Rojo Neón"></button><button class="theme-swatch" data-theme="purple" style="background-color: #9933ff;" title="Púrpura Neón"></button><button class="theme-swatch" data-theme="blue" style="background-color: #007bff;" title="Azul Neón"></button></div></div>
+        <div class="settings-section"><h5>Idioma</h5><div class="language-buttons"><button class="language-button active" data-lang="es">ES</button><button class="language-button" data-lang="en">EN</button></div></div>
+        <div class="settings-section"><h5><label for="particle-toggle">Partículas</label></h5><label class="switch"><input type="checkbox" id="particle-toggle" checked><span class="slider round"></span></label></div>
     </div>
 
     <div id="login-modal" class="modal">
-        <div class="modal-content">
+         <div class="modal-content">
             <button class="close-modal" id="close-login-modal">×</button>
             <h3 data-translate-key="login_modal_title">Iniciar Sesión / Registro</h3>
-
             <form id="email-password-form">
-                <div class="form-group">
-                    <label for="login-email" data-translate-key="login_email_label">Correo Electrónico</label>
-                    <input type="email" id="login-email" required autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label for="login-password" data-translate-key="login_password_label">Contraseña</label>
-                    <input type="password" id="login-password" required autocomplete="current-password">
-                </div>
-                <div class="form-error" id="login-error-message" style="display: none;"></div> <div class="form-actions">
-                    <button type="button" class="button-secondary" id="signup-button" data-translate-key="login_signup_button">Registrarse</button>
-                    <button type="button" class="button-primary" id="signin-button" data-translate-key="login_signin_button">Iniciar Sesión</button>
-                </div>
+                <div class="form-group"><label for="login-email" data-translate-key="login_email_label">Correo Electrónico</label><input type="email" id="login-email" required autocomplete="email"></div>
+                <div class="form-group"><label for="login-password" data-translate-key="login_password_label">Contraseña</label><input type="password" id="login-password" required autocomplete="current-password"></div>
+                <div class="form-error" id="login-error-message" style="display: none;"></div>
+                <div class="form-actions"><button type="button" class="button-secondary" id="signup-button" data-translate-key="login_signup_button">Registrarse</button><button type="button" class="button-primary" id="signin-button" data-translate-key="login_signin_button">Iniciar Sesión</button></div>
             </form>
-
             <div class="divider" data-translate-key="login_divider_or">O</div>
-
-            <button class="button-google" id="google-signin-button">
-                <i class="fab fa-google"></i> <span data-translate-key="login_google_firebase">Continuar con Google</span>
-            </button>
-
+            <button class="button-google" id="google-signin-button"><i class="fab fa-google"></i> <span data-translate-key="login_google_firebase">Continuar con Google</span></button>
             <p class="modal-info-text" data-translate-key="login_modal_text_firebase">Regístrate o inicia sesión para acceder a todas las funciones.</p>
         </div>
     </div>
 
     <main id="main-content" class="chat-layout">
         <div class="chat-container">
-
             <aside class="chat-sidebar">
                 <div class="sidebar-header">
                     <img id="sidebar-user-photo" src="https://via.placeholder.com/40/cccccc/ffffff?text=U" alt="User" class="profile-pic">
-                    <div class="user-info">
-                         <span id="sidebar-user-name">Usuario</span>
-                         </div>
+                    <div class="user-info"> <span id="sidebar-user-name">Usuario</span> </div>
                     <div class="sidebar-actions">
-                         <button class="icon-button" title="Nuevo chat (no funcional)" data-tooltip="Nuevo chat (no funcional)">
-                             <i class="fas fa-comment-medical"></i>
-                         </button>
-                         <button class="icon-button" title="Menú (no funcional)" data-tooltip="Menú (no funcional)">
-                             <i class="fas fa-ellipsis-v"></i>
-                         </button>
+                         <button class="icon-button" title="Nuevo chat (no funcional)" data-tooltip="Nuevo chat (no funcional)"><i class="fas fa-comment-medical"></i></button>
+                         <button class="icon-button" title="Menú (no funcional)" data-tooltip="Menú (no funcional)"><i class="fas fa-ellipsis-v"></i></button>
                     </div>
                 </div>
-
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" placeholder="Buscar o empezar un chat nuevo (no funcional)" disabled>
+                    <input type="text" placeholder="Buscar (no funcional)" disabled>
                 </div>
-
                 <div class="chat-list">
                     <div class="chat-list-item active" data-chat-id="general">
                         <img src="https://via.placeholder.com/50/777777/ffffff?text=G" alt="General" class="profile-pic">
                         <div class="chat-info">
                             <span class="chat-name" data-translate-key="chat_page_title">Chat General</span>
-                            <span class="last-message">Bienvenido al chat...</span> </div>
-                        <span class="timestamp"></span> </div>
+                            <span class="last-message">...</span>
+                        </div>
+                        <span class="timestamp"></span>
                     </div>
+                </div>
             </aside>
-
             <section class="chat-main">
                 <div class="chat-header">
                      <img src="https://via.placeholder.com/40/777777/ffffff?text=G" alt="General" class="profile-pic">
-                     <div class="chat-title">
-                         <span data-translate-key="chat_page_title">Chat General</span>
-                         </div>
+                     <div class="chat-title"><span data-translate-key="chat_page_title">Chat General</span></div>
                      <div class="chat-actions">
-                          <button class="icon-button" title="Llamada (no funcional)" data-tooltip="Llamada (no funcional)">
-                              <i class="fas fa-phone-alt"></i>
-                          </button>
-                          <button class="icon-button" title="Videollamada (no funcional)" data-tooltip="Videollamada (no funcional)">
-                              <i class="fas fa-video"></i>
-                          </button>
-                           <button class="icon-button" title="Más opciones (no funcional)" data-tooltip="Más opciones (no funcional)">
-                               <i class="fas fa-ellipsis-v"></i>
-                           </button>
+                          <button class="icon-button" title="Llamada (no funcional)" data-tooltip="Llamada (no funcional)"><i class="fas fa-phone-alt"></i></button>
+                          <button class="icon-button" title="Videollamada (no funcional)" data-tooltip="Videollamada (no funcional)"><i class="fas fa-video"></i></button>
+                           <button class="icon-button" title="Más opciones (no funcional)" data-tooltip="Más opciones (no funcional)"><i class="fas fa-ellipsis-v"></i></button>
                      </div>
                 </div>
-
-                <div id="chat-messages" class="messages-container">
+                 <div id="chat-messages" class="messages-container">
                      <p id="chat-loading-indicator" data-translate-key="chat_loading">Cargando mensajes...</p>
-                     </div>
-
-                <div id="chat-input-area" class="message-input-container">
-                     <button class="icon-button emoji-button" title="Emoji (no funcional)" data-tooltip="Emoji (no funcional)">
-                        <i class="far fa-grin"></i>
-                     </button>
-                     <input type="text" id="chat-message-input" data-translate-key="chat_input_placeholder" placeholder="Escribe un mensaje..." autocomplete="off">
-                     <button class="icon-button attach-button" title="Adjuntar (no funcional)" data-tooltip="Adjuntar (no funcional)">
-                         <i class="fas fa-paperclip"></i>
-                     </button>
-                     <button id="send-chat-message" class="send-button icon-button" title="Enviar">
-                         <i class="fas fa-paper-plane"></i>
-                     </button>
                  </div>
-
+                 <div id="chat-input-area" class="message-input-container">
+                     <button class="icon-button emoji-button" title="Emoji (no funcional)" data-tooltip="Emoji (no funcional)"><i class="far fa-grin"></i></button>
+                     <input type="text" id="chat-message-input" data-translate-key="chat_input_placeholder" placeholder="Escribe un mensaje..." autocomplete="off">
+                     <button class="icon-button attach-button" title="Adjuntar (no funcional)" data-tooltip="Adjuntar (no funcional)"><i class="fas fa-paperclip"></i></button>
+                     <button id="send-chat-message" class="send-button icon-button" title="Enviar"><i class="fas fa-paper-plane"></i></button>
+                 </div>
                  <div id="chat-login-prompt" style="display: none;" class="login-prompt">
                     <p><i class="fas fa-lock"></i> <span data-translate-key="login_needed_for_chat">Inicia sesión para chatear</span></p>
                     <button class="button-primary" id="chat-login-button">Iniciar Sesión</button>
                 </div>
             </section>
+        </div>
+    </main>
 
-        </div></main> <footer>
+    <footer>
         <p>&copy; <span id="current-year">2025</span> Pornitoo - Todos los derechos reservados.</p>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 
-        // 🔥🔥🔥 ¡¡¡ SUSTITUYE ESTO CON TU CONFIGURACIÓN REAL DE FIREBASE !!! 🔥🔥🔥
-         const firebaseConfig = {
-        apiKey: "AIzaSyAxmLKAoO5d0k0006h0LfIE0TXHFAw-3o0", // <--- PON TU API KEY REAL AQUÍ
-        authDomain: "pornitoo-ff650.firebaseapp.com",
-        projectId: "pornitoo-ff650",
-        storageBucket: "pornitoo-ff650.appspot.com", // <--- CORREGIDO
-        messagingSenderId: "91185468535",
-        appId: "1:91185468535:web:598d7c22db95ca6b186272",
-        measurementId: "G-65Z9T8PHB7",
-        databaseURL: "https://pornitoo-ff650-default-rtdb.firebaseio.com" // <--- AÑADE ESTO
-      };
-        // 🔥🔥🔥 ¡¡¡ FIN DE LA CONFIGURACIÓN A SUSTITUIR !!! 🔥🔥🔥
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxmLKAoO5d0k0006h0LfIE0TXHFAw-3o0",
+            authDomain: "pornitoo-ff650.firebaseapp.com",
+            projectId: "pornitoo-ff650",
+            storageBucket: "pornitoo-ff650.appspot.com",
+            messagingSenderId: "91185468535",
+            appId: "1:91185468535:web:598d7c22db95ca6b186272",
+            measurementId: "G-65Z9T8PHB7",
+            databaseURL: "https://pornitoo-ff650-default-rtdb.firebaseio.com"
+        };
 
-        // Inicializar Firebase y asignarlo a window para acceso global (si script.js no es módulo)
-        // Si script.js es módulo, no necesitas asignarlo a window.
         try {
             window.firebaseApp = initializeApp(firebaseConfig);
-            console.log("Firebase App initialized successfully in chat.html");
-        } catch (e) {
-            console.error("Firebase initialization error in chat.html:", e);
-            // Mostrar error crítico si falla la inicialización
-             const criticalErrorMsg = '<h1 style="color:red; text-align:center; margin-top: 50px; padding: 20px;">Error Crítico: No se pudo inicializar Firebase.<br>Revisa la configuración de `firebaseConfig` en chat.html y la consola del navegador.</h1>';
-             document.body.innerHTML = criticalErrorMsg; // Reemplaza todo el body con el mensaje
+            console.log(`Firebase App initialized successfully in ${window.location.pathname}`);
+            document.dispatchEvent(new CustomEvent('firebase-ready'));
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+             const criticalErrorMsg = `<div style="color:red; background:black; padding:20px; border: 2px solid red; text-align:center; position:fixed; top:10px; left:10px; right:10px; z-index:9999;"><h1>Error Crítico</h1><p>No se pudo inicializar Firebase. Revisa la consola (F12) y la configuración en ${window.location.pathname}.</p><p>${error.message}</p></div>`;
+             if (document.body) { document.body.insertAdjacentHTML('afterbegin', criticalErrorMsg); }
+             else { alert(`Critical Firebase Error: ${error.message}. Check console.`); }
+             throw new Error("Halting script execution due to Firebase init failure.");
         }
     </script>
 
     <script type="module" src="script.js" defer></script>
-
-</body>
+    <script type="module" src="chat_script.js" defer></script> </body>
 </html>
