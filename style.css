@@ -1465,3 +1465,174 @@ input:checked + .slider:before {
     /* Necesitarías ajustar el CSS del header nav en el media query para que sea column */
      header nav { flex-direction: column; align-items: stretch; } /* Ejemplo */
 }
+
+/* ======================================== */
+/* ESTILOS ADMIN Y SUGERENCIAS            */
+/* ======================================== */
+
+/* --- Botón Flotante Admin --- */
+.floating-admin-button {
+    position: fixed;
+    bottom: 30px;
+    left: 30px; /* Posición diferente a chat */
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
+    color: var(--background-color); /* Icono oscuro */
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem; /* Icono más grande */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 998; /* Debajo de modales */
+    transition: all var(--transition-speed) ease;
+    opacity: 0.8; /* Un poco transparente */
+}
+.floating-admin-button:hover {
+    transform: scale(1.1) rotate(-10deg);
+    box-shadow: 0 8px 20px hsla(from var(--primary-color) h s l / 0.5);
+    opacity: 1;
+}
+
+/* --- Panel Admin --- */
+.admin-panel {
+    position: fixed;
+    top: var(--header-height);
+    left: -350px; /* Oculto a la izquierda */
+    width: 300px;
+    max-width: 90%;
+    height: calc(100vh - var(--header-height));
+    background-color: var(--dark-grey);
+    border-right: 2px solid var(--primary-color);
+    box-shadow: 5px 0px 15px rgba(0, 0, 0, 0.3);
+    z-index: 999; /* Encima del botón flotante */
+    transition: left var(--transition-speed) ease-in-out;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+.admin-panel.visible {
+    left: 0;
+}
+.admin-panel h4 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.3rem;
+}
+.admin-panel .close-panel-button { /* Reutilizar estilo del panel settings */
+    position: absolute; top: 10px; right: 15px; font-size: 1.8rem;
+}
+.admin-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espacio entre botones */
+}
+.admin-actions .button-secondary.full-width {
+    width: 100%;
+    text-align: left; /* Alinear texto e icono a la izquierda */
+    padding: 12px 15px;
+}
+.admin-actions .button-secondary.full-width i {
+    margin-right: 10px;
+    width: 20px; /* Ancho fijo para icono */
+    text-align: center;
+}
+.admin-actions .button-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--medium-grey);
+    border-color: var(--light-grey);
+}
+
+
+/* --- Estilos Modales Específicos (Subir, Ver Solicitudes, Sugerir) --- */
+/* Reutilizar .modal y .modal-content, añadir modificadores si es necesario */
+.modal-content.wide {
+    max-width: 700px; /* Modal más ancho para listas */
+}
+
+/* Contenedor de lista de solicitudes */
+#requests-list-container {
+    max-height: 400px; /* Altura máxima para la lista */
+    overflow-y: auto;
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius-small);
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: var(--background-color); /* Fondo interior */
+}
+#requests-list-container p { /* Mensaje inicial 'cargando' */
+    text-align: center;
+    color: var(--text-color-secondary);
+    padding: 20px;
+}
+
+.request-item {
+    background-color: var(--medium-grey);
+    padding: 15px;
+    border-radius: var(--border-radius-small);
+    margin-bottom: 10px;
+    border-left: 4px solid var(--primary-color); /* Indicador visual */
+}
+.request-item h4 {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    color: var(--text-color-headings);
+}
+.request-item p {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    word-break: break-all; /* Romper URLs largas */
+}
+.request-item p strong {
+    color: var(--text-color-secondary);
+}
+.request-item p small {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-color-secondary);
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+.request-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+.request-actions button.small {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+    font-weight: normal;
+}
+.button-approve {
+     background-color: var(--primary-color); color: var(--background-color); border: none;
+}
+.button-approve:hover { background-color: var(--primary-color-dark); }
+.button-reject {
+     background-color: #6c757d; color: white; border: none;
+}
+.button-reject:hover { background-color: #5a6268;}
+
+/* Status message para modales admin/sugerencia */
+.admin-status {
+    margin-top: 15px; padding: 10px; border-radius: var(--border-radius-small); display: none; font-size: 0.9rem; text-align: center;
+}
+.admin-status.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+.admin-status.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+.admin-status.info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;}
+
+/* Estilo Botón Sugerir Video en Header */
+#request-video-button {
+    /* Hereda de .icon-button */
+    color: var(--primary-color); /* Destacarlo un poco */
+    font-size: 1.3rem; /* Ligeramente más grande */
+}
+#request-video-button:hover {
+     filter: brightness(1.2);
+}
+
