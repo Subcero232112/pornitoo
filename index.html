@@ -131,6 +131,7 @@
         try { window.firebaseApp = initializeApp(firebaseConfig); console.log(`Firebase Initialized: ${window.location.pathname}`); document.dispatchEvent(new CustomEvent('firebase-ready')); } catch (e) { console.error("Firebase init failed:", e); const msg = `<div style="color:red;background:black;padding:20px;border:2px solid red;text-align:center;position:fixed;top:10px;left:10px;right:10px;z-index:9999;"><h1>Error Crítico</h1><p>Firebase init falló. Revisa consola.</p><p>${e.message}</p></div>`; if(document.body) document.body.insertAdjacentHTML('afterbegin', msg); else alert(`Firebase Error: ${e.message}`); throw e; }
     </script>
     <script type="module" src="script.js" defer></script>
+    <script type="module" src="admin_script.js" defer></script>
 
 </body>
 </html>
