@@ -1,46 +1,72 @@
+// Imports Firebase
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getDatabase, ref, push, set, onChildAdded, serverTimestamp, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
+// Espera a que el DOM esté listo Y Firebase inicializado
+// document.addEventListener('firebase-ready', () => {
+//     initializeChatLogic();
+// });
+// O ejecutar directamente si confías en defer y que window.firebaseApp esté listo:
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.firebaseApp) {
+        initializeChatLogic();
+    } else {
+        console.error("Firebase not ready when chat_script tried to run. Waiting for firebase-ready event or check init order.");
+        // Escuchar el evento si aún no está listo
+        document.addEventListener('firebase-ready', initializeChatLogic, { once: true });
+    }
+});
+
+
+function initializeChatLogic() {
+    console.log("Initializing Chat Logic...");
+
     // --- 1. Firebase Setup ---
-    const firebaseApp = window.firebaseApp; // Get initialized app from global scope (or import if using modules)
-    if (!firebaseApp) {
-        console.error("Firebase app not initialized for chat. Check HTML setup.");
-        alert("Error de configuración. No se puede cargar el chat.");
+    if (!window.firebaseApp) {
+        console.error("Firebase app instance not found in chat_script!");
+        alert("Error crítico: No se pudo conectar a Firebase para el chat.");
         return;
     }
-    const auth = getAuth(firebaseApp);
-    const db = getDatabase(firebaseApp);
+    const auth = getAuth(window.firebaseApp);
+    const db = getDatabase(window.firebaseApp);
 
     // --- 2. Selectors for Chat Interface ---
-    const messagesList = document.getElementById('chat-messages-list');
+    const messagesList = document.getElementById('chat-messages'); // ID corregido
     const messageInput = document.getElementById('chat-message-input');
-    const sendButton = document.getElementById('chat-send-button');
-    const chatLoadingIndicator = document.querySelector('.chat-loading');
-    const userAuthButtonChat = document.getElementById('user-auth-button'); // Auth button in chat header
+    const sendButton = document.getElementById('send-chat-message'); // ID corregido
+    const chatLoadingIndicator = document.getElementById('chat-loading-indicator'); // ID corregido
+    const chatLoginPrompt = document.getElementById('chat-login-prompt'); // ID corregido
+    const chatLoginButton = document.getElementById('chat-login-button'); // ID corregido
+    // Selectores para actualizar info de la lista de chats (si fuera necesario)
+    const chatListLastMessage = document.querySelector('.chat-list-item[data-chat-id="general"] .last-message');
+    const chatListTimestamp = document.querySelector('.chat-list-item[data-chat-id="general"] .timestamp');
+
 
     // --- 3. State ---
-    let currentUser = null; // Store current user
-    const chatRoomId = 'general'; // Use a specific room ID
+    let currentUser = null;
+    let isScrolledToBottom = true; // Flag para auto-scroll inteligente
+    const chatRoomId = 'general'; // Chat único por ahora
     const messagesRef = ref(db, `chats/${chatRoomId}`);
-    const messagesQuery = query(messagesRef, orderByChild('timestamp'), limitToLast(50)); // Get last 50 messages ordered by time
+    const messagesQuery = query(messagesRef, orderByChild('timestamp'), limitToLast(50)); // Cargar últimos 50 mensajes
 
     // --- 4. Functions ---
+    function escapeHTML(str) { /* ... (igual que antes) ... */
+         const div = document.createElement('div'); div.appendChild(document.createTextNode(str)); return div.innerHTML;
+     }
+     function formatDate(timestamp) { /* ... (igual que antes) ... */
+         if (!timestamp) return '---'; try { const date = new Date(timestamp); return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } // Solo hora para chat
+         catch (e) { console.error("Error formatting date:", e); return '--:--'; }
+     }
 
-    // Function to display a message in the UI
     function displayMessage(key, messageData) {
-        if (!messagesList || !messageData || !messageData.text) return; // Basic validation
+        if (!messagesList || !messageData || !messageData.text) return;
 
-        // Hide loading indicator once first message is displayed
-        if (chatLoadingIndicator && chatLoadingIndicator.style.display !== 'none') {
-            chatLoadingIndicator.style.display = 'none';
+        if (chatLoadingIndicator && chatLoadingIndicator.parentNode === messagesList) {
+            chatLoadingIndicator.remove();
         }
 
         const messageId = `message-${key}`;
-        // Avoid adding duplicate messages if listener fires multiple times somehow
-        if (document.getElementById(messageId)) {
-            return;
-        }
+        if (document.getElementById(messageId)) return; // Evitar duplicados
 
         const messageElement = document.createElement('div');
         messageElement.classList.add('chat-message');
@@ -49,165 +75,133 @@ document.addEventListener('DOMContentLoaded', () => {
         const isSent = currentUser && messageData.userId === currentUser.uid;
         messageElement.classList.add(isSent ? 'sent' : 'received');
 
-        const avatarUrl = messageData.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(messageData.userName || 'U')}&background=random&color=fff`;
+        const timestamp = messageData.timestamp ? formatDate(messageData.timestamp) : formatDate(Date.now());
+        const senderName = isSent ? '' : `<span class="sender-name">${escapeHTML(messageData.userName || 'Usuario')}</span>`;
 
-        // Format timestamp
-        let timeString = '';
-        if (messageData.timestamp) {
-            try {
-                const date = new Date(messageData.timestamp);
-                 // Check if the date is valid before formatting
-                 if (!isNaN(date.getTime())) {
-                     timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                 } else {
-                     console.warn("Invalid timestamp received:", messageData.timestamp);
-                     // Optionally display a placeholder or server time if available immediately
-                     // timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                 }
-
-            } catch (e) {
-                console.error("Error formatting timestamp:", e);
-            }
-        }
-
-
-        // Structure: [Avatar (if received)] [Bubble]
         messageElement.innerHTML = `
-            ${!isSent ? `<img src="${avatarUrl}" alt="${messageData.userName || 'Avatar'}" class="message-avatar">` : ''}
-            <div class="message-bubble">
-                ${!isSent ? `<span class="message-sender">${messageData.userName || 'Usuario'}</span>` : ''}
-                <span class="message-text">${escapeHTML(messageData.text)}</span>
-                <span class="message-time">${timeString}</span>
-            </div>
+            ${senderName}
+            <span class="message-content">${escapeHTML(messageData.text)}</span>
+            <span class="message-timestamp">${timestamp}</span>
         `;
 
-        messagesList.appendChild(messageElement);
+        // Actualizar preview en sidebar (solo último mensaje)
+        if(chatListLastMessage) chatListLastMessage.textContent = escapeHTML(messageData.text);
+        if(chatListTimestamp) chatListTimestamp.textContent = timestamp;
 
-        // Auto-scroll to the bottom
-        scrollToBottom();
+
+        // Scroll inteligente: solo si ya estaba abajo o es mensaje propio
+        const shouldScroll = isScrolledToBottom || isSent;
+        messagesList.appendChild(messageElement);
+        if (shouldScroll) {
+            scrollToBottom();
+        }
     }
 
-    // Function to send a message
     async function sendMessage() {
-        if (!messageInput || !currentUser) return; // Need input and logged-in user
-
+        if (!messageInput || !currentUser || !sendButton) return;
         const text = messageInput.value.trim();
-        if (text === '') return; // Don't send empty messages
+        if (text === '') return;
 
         const messageData = {
             userId: currentUser.uid,
             userName: currentUser.displayName || 'Usuario Anónimo',
-            userPhoto: currentUser.photoURL || null, // Store photo URL
+            // userPhoto: currentUser.photoURL || null, // Podrías incluirlo si quieres mostrar avatares en chat
             text: text,
-            timestamp: serverTimestamp() // Use Firebase server time
+            timestamp: serverTimestamp() // Usar timestamp del servidor
         };
 
         try {
-            // Disable input while sending
-            messageInput.disabled = true;
-            sendButton.disabled = true;
-
-            const newMessageRef = push(messagesRef); // Generate unique key
+            messageInput.disabled = true; sendButton.disabled = true;
+            const newMessageRef = push(messagesRef);
             await set(newMessageRef, messageData);
-
-            messageInput.value = ''; // Clear input field
-            console.log("Message sent:", newMessageRef.key);
-
+            messageInput.value = '';
         } catch (error) {
             console.error("Error sending message:", error);
-            alert("Error al enviar el mensaje."); // Inform user
+            alert("Error al enviar el mensaje.");
         } finally {
-            // Re-enable input regardless of success/failure
-             if (currentUser) { // Only re-enable if still logged in
-                 messageInput.disabled = false;
-                 sendButton.disabled = false;
-                 messageInput.focus(); // Set focus back to input
-             }
+            if (currentUser) { // Solo re-habilitar si sigue logueado
+                 messageInput.disabled = false; sendButton.disabled = false;
+                 messageInput.focus();
+            }
         }
     }
 
-    // Function to scroll message list to bottom
     function scrollToBottom() {
         if (messagesList) {
             messagesList.scrollTop = messagesList.scrollHeight;
         }
     }
 
-    // Utility to escape HTML to prevent XSS
-     function escapeHTML(str) {
-         const div = document.createElement('div');
-         div.appendChild(document.createTextNode(str));
-         return div.innerHTML;
-     }
+    // Detectar si el usuario ha hecho scroll hacia arriba
+    if(messagesList) {
+        messagesList.addEventListener('scroll', () => {
+            const threshold = 10; // Píxeles de margen
+            isScrolledToBottom = messagesList.scrollHeight - messagesList.scrollTop - messagesList.clientHeight < threshold;
+        });
+    }
 
 
-    // Function to handle user authentication state changes specific to chat
     function handleAuthStateChange(user) {
         currentUser = user;
         if (user) {
-            // User is logged in
             console.log("Chat Auth: User Logged In", user.uid);
-            if (messageInput) messageInput.disabled = false;
+            if(chatLoginPrompt) chatLoginPrompt.style.display = 'none';
+            if (messageInput) { messageInput.disabled = false; messageInput.placeholder = window.translations?.[window.currentLang || 'es']?.chat_input_placeholder || "Type a message..."; }
             if (sendButton) sendButton.disabled = false;
-            if (messageInput) messageInput.placeholder = translations[window.currentLang || 'es']?.chat_input_placeholder || "Type a message..."; // Use translated placeholder
-            // Load messages ONLY when logged in (based on security rules)
-            loadMessages();
+            loadMessages(); // Cargar mensajes al iniciar sesión
         } else {
-            // User is logged out
             console.log("Chat Auth: User Logged Out");
-            if (messageInput) messageInput.disabled = true;
+             if (messageInput) { messageInput.disabled = true; messageInput.placeholder = window.translations?.[window.currentLang || 'es']?.login_needed_for_chat || "Log in to chat"; messageInput.value = '';}
             if (sendButton) sendButton.disabled = true;
-            if (messagesList) messagesList.innerHTML = '<div class="chat-loading" data-translate-key="login_needed_for_chat">Inicia sesión para ver y enviar mensajes.</div>'; // Clear messages/show login prompt
-            if (messageInput) messageInput.placeholder = translations[window.currentLang || 'es']?.login_needed_for_chat || "Log in to chat";
-            // Optional: Show login modal automatically if user tries to access chat directly when logged out
-            // uiManager.toggleModal($('#login-modal'), true); // Assuming uiManager is accessible or replicated here
+            if (messagesList) messagesList.innerHTML = ''; // Limpiar mensajes
+            if (chatLoadingIndicator && messagesList) messagesList.appendChild(chatLoadingIndicator); // Mostrar indicador de carga (que dirá login)
+            if (chatLoadingIndicator) chatLoadingIndicator.textContent = window.translations?.[window.currentLang || 'es']?.login_needed_for_chat || "Log in to chat";
+            if(chatLoginPrompt) chatLoginPrompt.style.display = 'flex'; // Mostrar prompt
         }
-         // Update the header auth button UI (handled by the main script.js listener)
-         // updateAuthButtonUI(user); // This function is in script.js
+        // La UI del header/sidebar la actualiza script.js
     }
 
-    // Function to load initial messages and listen for new ones
     function loadMessages() {
-        if (!messagesList) return;
-         // Clear existing messages before loading/listening
-         messagesList.innerHTML = ''; // Clear previous content
-         if (chatLoadingIndicator) chatLoadingIndicator.style.display = 'block'; // Show loading
+        if (!messagesList || !currentUser) return; // No cargar si no hay user o contenedor
+        messagesList.innerHTML = ''; // Limpiar
+         if (chatLoadingIndicator && messagesList) messagesList.appendChild(chatLoadingIndicator);
+         chatLoadingIndicator.textContent = window.translations?.[window.currentLang || 'es']?.chat_loading || "Loading messages...";
 
-        // Listen for new messages added to the chat room
-         onChildAdded(messagesQuery, (snapshot) => {
+
+        // Escuchar nuevos mensajes
+        onChildAdded(messagesQuery, (snapshot) => {
              const messageData = snapshot.val();
              const messageKey = snapshot.key;
              displayMessage(messageKey, messageData);
          }, (error) => {
              console.error("Error fetching messages:", error);
-             if (messagesList) messagesList.innerHTML = `<div class="chat-loading error">Error al cargar mensajes: ${error.message}</div>`;
-             if (chatLoadingIndicator) chatLoadingIndicator.style.display = 'none';
+              if (chatLoadingIndicator) chatLoadingIndicator.textContent = "Error al cargar mensajes.";
+             if (chatLoadingIndicator?.style) chatLoadingIndicator.style.color = 'red';
          });
-
-         // Optional: Handle message removal or changes if needed
-         // onChildRemoved(...)
-         // onChildChanged(...)
     }
-
 
     // --- 5. Event Listeners ---
     if (sendButton && messageInput) {
         sendButton.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { // Send on Enter (not Shift+Enter)
-                e.preventDefault(); // Prevent default newline behavior
-                sendMessage();
-            }
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+    }
+    if (chatLoginButton) {
+        chatLoginButton.addEventListener('click', () => {
+            // Asumimos que uiManager está disponible globalmente o importado si usas módulos complejos
+             if (window.uiManager && typeof window.uiManager.toggleModal === 'function' && window.$) {
+                 window.uiManager.toggleModal(window.$('#login-modal'), true);
+             } else {
+                 // Fallback o aviso si uiManager no está listo/accesible
+                 alert("Por favor, inicia sesión usando el icono de usuario en la cabecera.");
+                 console.warn("uiManager no disponible para abrir modal desde chat_script");
+             }
         });
     }
 
-    // Listen for auth state changes
+    // --- 6. Initial Auth Check ---
     onAuthStateChanged(auth, handleAuthStateChange);
+    console.log("Chat script logic initialized.");
 
-    // --- 6. Initial Setup ---
-    // Initial UI state is set by handleAuthStateChange when the listener fires.
-    console.log("Chat script loaded.");
-
-}); // Fin DOMContentLoaded
-
-
+} 
