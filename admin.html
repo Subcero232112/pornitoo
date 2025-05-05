@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Añadir Video</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos básicos adicionales para el admin */
+        body { padding-top: 80px; } /* Más espacio para header */
+        #admin-content { max-width: 700px; margin: 20px auto; padding: 25px; background-color: var(--dark-grey); border-radius: var(--border-radius); }
+        #add-video-form .form-group { margin-bottom: 15px; }
+        #add-video-form label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--text-color-secondary); }
+        #add-video-form input[type="text"],
+        #add-video-form input[type="url"],
+        #add-video-form textarea,
+        #add-video-form select {
+            width: 100%; padding: 10px; background-color: var(--medium-grey); border: 1px solid var(--light-grey); color: var(--text-color); border-radius: var(--border-radius-small); font-size: 1rem;
+        }
+        #add-video-form textarea { min-height: 80px; resize: vertical; }
+        #add-video-form .radio-group label { display: inline-block; margin-right: 15px; font-weight: normal; }
+        #admin-status { margin-top: 15px; padding: 10px; border-radius: var(--border-radius-small); display: none; }
+        #admin-status.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+        #admin-status.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+        #admin-login-prompt { text-align: center; color: orange; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="index.html" id="header-logo" class="logo">Pornitoo - Admin</a>
+            </div>
+    </header>
+
+    <main id="admin-content">
+        <h1>Añadir Nuevo Video</h1>
+
+        <p id="admin-login-prompt" style="display: none;">Debes <a href="#" id="admin-login-link">iniciar sesión</a> como administrador para añadir videos.</p>
+
+        <form id="add-video-form" style="display: none;"> <div class="form-group">
+                <label for="video-title">Título:</label>
+                <input type="text" id="video-title" required>
+            </div>
+            <div class="form-group">
+                <label for="video-description">Descripción:</label>
+                <textarea id="video-description"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Tipo de Fuente:</label>
+                <div class="radio-group">
+                    <input type="radio" id="source-storage" name="sourceType" value="storage" checked>
+                    <label for="source-storage">Firebase Storage</label>
+                    <input type="radio" id="source-drive" name="sourceType" value="drive">
+                    <label for="source-drive">Google Drive</label>
+                    <input type="radio" id="source-url" name="sourceType" value="url">
+                    <label for="source-url">URL Directa / Embed</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="video-url">URL del Video:</label>
+                <input type="url" id="video-url" placeholder="URL pública de Storage, enlace de Drive, URL directa o de Embed" required>
+                <small style="color: var(--text-color-secondary);">Importante: Para Drive, usa el enlace "Publicar en la Web" o un formato de embed si es posible. Los enlaces de compartir normales pueden no funcionar.</small>
+            </div>
+             <div class="form-group">
+                <label for="poster-url">URL del Póster:</label>
+                <input type="url" id="poster-url" placeholder="URL pública de la imagen (Storage u otra)" required>
+            </div>
+             <div class="form-group">
+                <label for="video-genre">Género (Opcional):</label>
+                <select id="video-genre">
+                    <option value="">-- Selecciona --</option>
+                    <option value="accion">Acción</option>
+                    <option value="comedia">Comedia</option>
+                    <option value="drama">Drama</option>
+                    <option value="otro">Otro</option>
+                    </select>
+            </div>
+            <button type="submit" class="button-primary">Añadir Video</button>
+        </form>
+        <div id="admin-status"></div>
+    </main>
+
+    <div id="login-modal" class="modal">
+       <div class="modal-content">
+            <button class="close-modal" id="close-login-modal">×</button>
+             <h3 data-translate-key="login_modal_title">Iniciar Sesión / Registro</h3>
+             <form id="email-password-form">
+                 <div class="form-group"><label for="login-email" data-translate-key="login_email_label">Correo Electrónico</label><input type="email" id="login-email" required autocomplete="email"></div>
+                 <div class="form-group"><label for="login-password" data-translate-key="login_password_label">Contraseña</label><input type="password" id="login-password" required autocomplete="current-password"></div>
+                 <div class="form-error" id="login-error-message" style="display: none;"></div>
+                 <div class="form-actions"><button type="button" class="button-secondary" id="signup-button" data-translate-key="login_signup_button">Registrarse</button><button type="button" class="button-primary" id="signin-button" data-translate-key="login_signin_button">Iniciar Sesión</button></div>
+             </form>
+             <div class="divider" data-translate-key="login_divider_or">O</div>
+             <button class="button-google" id="google-signin-button"><i class="fab fa-google"></i> <span data-translate-key="login_google_firebase">Continuar con Google</span></button>
+             <p class="modal-info-text" data-translate-key="login_modal_text_firebase">Inicia sesión para continuar.</p>
+         </div>
+     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxmLKAoO5d0k0006h0LfIE0TXHFAw-3o0", authDomain: "pornitoo-ff650.firebaseapp.com", projectId: "pornitoo-ff650", storageBucket: "pornitoo-ff650.appspot.com", messagingSenderId: "91185468535", appId: "1:91185468535:web:598d7c22db95ca6b186272", measurementId: "G-65Z9T8PHB7", databaseURL: "https://pornitoo-ff650-default-rtdb.firebaseio.com"
+        };
+        try { window.firebaseApp = initializeApp(firebaseConfig); console.log("Firebase Initialized (Admin)"); document.dispatchEvent(new CustomEvent('firebase-ready')); } catch (e) { console.error("Firebase init failed:", e); alert("Error inicializando Firebase!"); }
+    </script>
+    <script type="module" src="admin_script.js" defer></script>
+    </body>
+</html>
