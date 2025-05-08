@@ -75,38 +75,54 @@ function initializeAppAdminLogic() {
             setTimeout(() => { if(element) element.style.display = 'none'; }, autoHideDelay);
         }
     }
-     // Función para toggle simple (Mostrar/Ocultar Elementos como Paneles/Modales)
-     function toggleElement(element, forceState) {
-        if (!element) { console.warn("toggleElement called with null element"); return; }
-        // Determinar si el elemento debería estar visible basado en el estado actual o forzado
-        const currentlyVisible = element.classList.contains('visible') || element.style.display === 'block' || element.style.display === 'flex';
-        const shouldBeVisible = forceState === undefined ? !currentlyVisible : forceState;
+     // En la función toggleElement() del archivo admin_script.js
+function toggleElement(element, forceState) {
+    if (!element) { 
+        console.warn("toggleElement called with null element"); 
+        return; 
+    }
+    
+    // Determinar si el elemento debería estar visible
+    const currentlyVisible = element.classList.contains('visible') || 
+                            element.style.display === 'block' || 
+                            element.style.display === 'flex';
+    const shouldBeVisible = forceState === undefined ? !currentlyVisible : forceState;
 
-        // Usar clase 'visible' para paneles/modales que usan transiciones CSS
-        const isModal = element.classList.contains('modal');
-        const isPanel = element.classList.contains('panel') || element.classList.contains('admin-panel') || element.classList.contains('settings-panel');
+    // Para el panel de administrador específicamente
+    if (element.id === 'admin-panel') {
+        // Forzar que se muestre usando display: flex;
+        element.style.display = shouldBeVisible ? 'flex' : 'none';
+        console.log(`Admin panel visibility set to: ${shouldBeVisible ? 'visible' : 'hidden'}`);
+        return;
+    }
 
-        if (isModal || isPanel) {
-             element.classList.toggle('visible', shouldBeVisible);
-             console.log(`Toggled 'visible' class for #${element.id || 'element'}: ${shouldBeVisible}`);
-        } else {
-             // Usar display para otros elementos si no usan la clase 'visible'
-             const displayStyle = shouldBeVisible ? (element.tagName === 'BUTTON' || element.tagName === 'DIV' ? 'flex' : 'block') : 'none';
-             element.style.display = displayStyle;
-             console.log(`Toggled display style for #${element.id || 'element'}: ${displayStyle}`);
-        }
+    // Para modales y otros paneles
+    const isModal = element.classList.contains('modal');
+    const isPanel = element.classList.contains('panel') || 
+                    element.classList.contains('admin-panel') || 
+                    element.classList.contains('settings-panel');
 
-        // Limpiar formularios y mensajes de estado al cerrar modales específicos
-        if (!shouldBeVisible) {
-            if (element === addVideoModal && addVideoForm) addVideoForm.reset();
-            if (element === requestVideoModal && requestVideoForm) requestVideoForm.reset();
-            if (element === addVideoModal) showStatusMessage(addVideoStatus, '', 'info', 0);
-            if (element === viewRequestsModal) showStatusMessage(viewRequestsStatus, '', 'info', 0);
-            if (element === requestVideoModal) showStatusMessage(requestVideoStatus, '', 'info', 0);
-        }
-     }
+    if (isModal || isPanel) {
+        element.classList.toggle('visible', shouldBeVisible);
+        console.log(`Toggled 'visible' class for #${element.id || 'element'}: ${shouldBeVisible}`);
+    } else {
+        // Usar display para otros elementos
+        const displayStyle = shouldBeVisible ? 
+            (element.tagName === 'BUTTON' || element.tagName === 'DIV' ? 'flex' : 'block') : 'none';
+        element.style.display = displayStyle;
+        console.log(`Toggled display style for #${element.id || 'element'}: ${displayStyle}`);
+    }
 
-
+    // Limpiar formularios y mensajes de estado al cerrar modales específicos
+    if (!shouldBeVisible) {
+        if (element === addVideoModal && addVideoForm) addVideoForm.reset();
+        if (element === requestVideoModal && requestVideoForm) requestVideoForm.reset();
+        if (element === addVideoModal) showStatusMessage(addVideoStatus, '', 'info', 0);
+        if (element === viewRequestsModal) showStatusMessage(viewRequestsStatus, '', 'info', 0);
+        if (element === requestVideoModal) showStatusMessage(requestVideoStatus, '', 'info', 0);
+    }
+}
+    
     // --- Lógica de Visibilidad Admin/User y Setup Formularios ---
     onAuthStateChanged(auth, (user) => {
         currentAdminUser = user;
