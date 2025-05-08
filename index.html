@@ -24,98 +24,55 @@
                  <button id="search-button" data-translate-key="search_button"><i class="fas fa-search"></i></button>
              </div>
             <div class="header-actions">
-                 <button id="request-video-button" class="icon-button" data-tooltip="Sugerir Video" title="Sugerir Video" style="display: none;"> <i class="fas fa-plus-circle"></i>
+                 <button id="request-video-button" class="icon-button" data-tooltip="Sugerir Video" title="Sugerir Video" style="display: none;">
+                     <i class="fas fa-plus-circle"></i>
                  </button>
+                 <a href="admin.html" id="admin-header-link" class="icon-button" data-tooltip="Panel Admin" title="Panel Admin" style="display: none;">
+                    <i class="fas fa-shield-alt"></i>
+                 </a>
                 <button id="settings-button" class="icon-button" data-tooltip="Configuración" title="Configuración"><i class="fas fa-cog"></i></button>
                 <a href="chat.html" class="icon-button chat-icon-header" data-tooltip="Ir al Chat" title="Ir al Chat">
                     <i class="fas fa-comments"></i>
                 </a>
                 <button id="user-auth-button" class="icon-button" data-tooltip="Iniciar Sesión" title="Iniciar Sesión">
                     <i class="fas fa-user"></i>
-                </button>
+                    </button>
             </div>
         </div>
     </header>
 
     <div id="settings-panel" class="settings-panel">
-        <button id="close-settings-button" class="close-panel-button">×</button><h4>Configuración</h4><div class="settings-section"><h5>Tema</h5><div class="theme-swatches"><button class="theme-swatch active" data-theme="green" style="background-color:#00ff00;" title="Verde Neón"></button><button class="theme-swatch" data-theme="red" style="background-color:#ff1a1a;" title="Rojo Neón"></button><button class="theme-swatch" data-theme="purple" style="background-color:#9933ff;" title="Púrpura Neón"></button><button class="theme-swatch" data-theme="blue" style="background-color:#007bff;" title="Azul Neón"></button></div></div><div class="settings-section"><h5>Idioma</h5><div class="language-buttons"><button class="language-button active" data-lang="es">ES</button><button class="language-button" data-lang="en">EN</button></div></div><div class="settings-section"><h5><label for="particle-toggle">Partículas</label></h5><label class="switch"><input type="checkbox" id="particle-toggle" checked><span class="slider round"></span></label></div>
+        <button id="close-settings-button" class="close-panel-button">×</button>
+        <h4>Configuración</h4>
+        <div class="settings-section"><h5>Tema</h5><div class="theme-swatches"><button class="theme-swatch active" data-theme="green" style="background-color:#00ff00;" title="Verde Neón"></button><button class="theme-swatch" data-theme="red" style="background-color:#ff1a1a;" title="Rojo Neón"></button><button class="theme-swatch" data-theme="purple" style="background-color:#9933ff;" title="Púrpura Neón"></button><button class="theme-swatch" data-theme="blue" style="background-color:#007bff;" title="Azul Neón"></button></div></div>
+        <div class="settings-section"><h5>Idioma</h5><div class="language-buttons"><button class="language-button active" data-lang="es">ES</button><button class="language-button" data-lang="en">EN</button></div></div>
+        <div class="settings-section"><h5><label for="particle-toggle">Partículas</label></h5><label class="switch"><input type="checkbox" id="particle-toggle" checked><span class="slider round"></span></label></div>
     </div>
 
     <div id="login-modal" class="modal">
          <div class="modal-content"><button class="close-modal" id="close-login-modal">×</button><h3 data-translate-key="login_modal_title">Iniciar Sesión / Registro</h3><form id="email-password-form"><div class="form-group"><label for="login-email" data-translate-key="login_email_label">Correo Electrónico</label><input type="email" id="login-email" required autocomplete="email"></div><div class="form-group"><label for="login-password" data-translate-key="login_password_label">Contraseña</label><input type="password" id="login-password" required autocomplete="current-password"></div><div class="form-error" id="login-error-message" style="display:none;"></div><div class="form-actions"><button type="button" class="button-secondary" id="signup-button" data-translate-key="login_signup_button">Registrarse</button><button type="button" class="button-primary" id="signin-button" data-translate-key="login_signin_button">Iniciar Sesión</button></div></form><div class="divider" data-translate-key="login_divider_or">O</div><button class="button-google" id="google-signin-button"><i class="fab fa-google"></i> <span data-translate-key="login_google_firebase">Continuar con Google</span></button><p class="modal-info-text" data-translate-key="login_modal_text_firebase">Regístrate o inicia sesión para acceder a todas las funciones.</p></div>
     </div>
 
-    <main id="main-content">
-        <h2 id="popular-title" data-translate-key="popular_title" style="margin-bottom: 20px;">Populares Ahora</h2>
-        <div id="poster-container">
-            <p id="loading-indicator" style="text-align: center; padding: 40px; color: var(--text-color-secondary);" data-translate-key="loading">Cargando...</p>
-        </div>
-    </main>
-
-    <button id="admin-fab" class="floating-admin-button" title="Panel de Administrador" style="display: none;">
-        <i class="fas fa-shield-alt"></i>
-    </button>
-
-    <div id="admin-panel" class="admin-panel">
-        <button id="close-admin-panel-button" class="close-panel-button">×</button>
-        <h4>Menú de Administrador</h4>
-        <div class="admin-actions">
-            <button id="admin-upload-video-btn" class="button-secondary full-width"><i class="fas fa-upload"></i> Subir Video</button>
-            <button id="admin-view-requests-btn" class="button-secondary full-width"><i class="fas fa-inbox"></i> Ver Solicitudes</button>
-            <button id="admin-ban-user-btn" class="button-secondary full-width" disabled><i class="fas fa-user-slash"></i> Banear Usuario (Próx.)</button>
-            <button id="admin-kick-user-btn" class="button-secondary full-width" disabled><i class="fas fa-shoe-prints"></i> Kick Usuario (Próx.)</button>
-        </div>
-    </div>
-
-    <div id="add-video-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-modal" id="close-add-video-modal">×</button>
-            <h3>Añadir Nuevo Video</h3>
-            <form id="add-video-form">
-                 <input type="hidden" id="request-id-to-approve"> <div class="form-group"><label for="video-title">Título:</label><input type="text" id="video-title" required></div>
-                 <div class="form-group"><label for="video-description">Descripción:</label><textarea id="video-description"></textarea></div>
-                 <div class="form-group"><label>Tipo de Fuente:</label><div class="radio-group"><input type="radio" id="source-storage" name="sourceType" value="storage" checked><label for="source-storage">Storage</label><input type="radio" id="source-drive" name="sourceType" value="drive"><label for="source-drive">Drive</label><input type="radio" id="source-url" name="sourceType" value="url"><label for="source-url">URL/Embed</label></div></div>
-                 <div class="form-group"><label for="video-url">URL del Video:</label><input type="url" id="video-url" placeholder="URL pública/embed" required></div>
-                 <div class="form-group"><label for="poster-url">URL del Póster:</label><input type="url" id="poster-url" placeholder="URL pública de imagen" required></div>
-                 <div class="form-group"><label for="video-genre">Género:</label><select id="video-genre"><option value="">-- Selecciona --</option><option value="accion">Acción</option><option value="comedia">Comedia</option><option value="otro">Otro</option></select></div>
-                 <button type="submit" id="submit-video-button" class="button-primary">Añadir Video</button>
-            </form>
-            <div id="add-video-status" class="admin-status"></div>
-        </div>
-    </div>
-
-    <div id="view-requests-modal" class="modal">
-        <div class="modal-content wide"> <button class="close-modal" id="close-view-requests-modal">×</button>
-            <h3>Solicitudes de Videos Pendientes</h3>
-            <div id="requests-list-container">
-                <p>Cargando solicitudes...</p>
-                </div>
-            <div id="view-requests-status" class="admin-status"></div>
-        </div>
-    </div>
-
-    <div id="request-video-modal" class="modal">
+     <div id="request-video-modal" class="modal">
          <div class="modal-content">
              <button class="close-modal" id="close-request-video-modal">×</button>
             <h3>Sugerir un Video</h3>
             <form id="request-video-form">
-                 <div class="form-group">
-                    <label for="request-title">Título del Video:</label>
-                    <input type="text" id="request-title" required>
-                </div>
-                 <div class="form-group">
-                    <label for="request-url">URL del Video (Opcional):</label>
-                    <input type="url" id="request-url" placeholder="Enlace a YouTube, Vimeo, Drive, etc.">
-                </div>
-                 <div class="form-group">
-                    <label for="request-reason">Descripción o Razón:</label>
-                    <textarea id="request-reason" rows="3" required placeholder="¿Por qué deberíamos añadir este video?"></textarea>
-                </div>
-                <button type="submit" id="submit-request-button" class="button-primary">Enviar Sugerencia</button>
+                 <div class="form-group"><label for="request-title">Título del Video:</label><input type="text" id="request-title" required></div>
+                 <div class="form-group"><label for="request-url">URL del Video (Opcional):</label><input type="url" id="request-url" placeholder="Enlace a YouTube, Vimeo, Drive, etc."></div>
+                 <div class="form-group"><label for="request-reason">Descripción o Razón:</label><textarea id="request-reason" rows="3" required placeholder="¿Por qué deberíamos añadir este video?"></textarea></div>
+                 <button type="submit" id="submit-request-button" class="button-primary">Enviar Sugerencia</button>
             </form>
-             <div id="request-video-status" class="admin-status"></div> </div>
+             <div id="request-video-status" class="admin-status"></div>
+        </div>
     </div>
 
+    <main id="main-content">
+        <h2 id="popular-title" data-translate-key="popular_title" style="margin-bottom: 20px;">Populares Ahora</h2>
+        <div id="poster-container">
+            <p id="loading-indicator" style="text-align: center; padding: 40px; color: var(--text-color-secondary);" data-translate-key="loading">Cargando...</p>
+            </div>
+    </main>
 
     <footer>
         <p>&copy; <span id="current-year">2025</span> Pornitoo - Todos los derechos reservados.</p>
@@ -131,7 +88,6 @@
         try { window.firebaseApp = initializeApp(firebaseConfig); console.log(`Firebase Initialized: ${window.location.pathname}`); document.dispatchEvent(new CustomEvent('firebase-ready')); } catch (e) { console.error("Firebase init failed:", e); const msg = `<div style="color:red;background:black;padding:20px;border:2px solid red;text-align:center;position:fixed;top:10px;left:10px;right:10px;z-index:9999;"><h1>Error Crítico</h1><p>Firebase init falló. Revisa consola.</p><p>${e.message}</p></div>`; if(document.body) document.body.insertAdjacentHTML('afterbegin', msg); else alert(`Firebase Error: ${e.message}`); throw e; }
     </script>
     <script type="module" src="script.js" defer></script>
-    <script type="module" src="admin_script.js" defer></script>
 
 </body>
 </html>
