@@ -7,6 +7,48 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        /* Estilos adicionales específicos para esta página si son necesarios */
+        /* Para posters cuadrados, se modificará .poster en style.css o aquí si es muy específico */
+        .poster {
+            aspect-ratio: 1 / 1; /* Hace el poster cuadrado */
+        }
+        .poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Asegura que la imagen cubra el área cuadrada */
+        }
+        /* Nuevas opciones de ajustes */
+        .settings-section .form-group {
+            margin-bottom: 15px;
+        }
+        .settings-section .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color-secondary);
+            font-size: 0.9em;
+        }
+        .settings-section .form-group input[type="range"],
+        .settings-section .form-group select,
+        .settings-section .form-group input[type="text"],
+        .settings-section .form-group input[type="checkbox"] {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--medium-grey);
+            border: 1px solid var(--light-grey);
+            color: var(--text-color);
+            border-radius: var(--border-radius-small);
+        }
+        .settings-section .form-group input[type="checkbox"] {
+            width: auto; /* Ajustar para checkbox */
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .settings-section .checkbox-label {
+            vertical-align: middle;
+            font-size: 0.95em;
+        }
+    </style>
 </head>
 <body>
 
@@ -27,9 +69,6 @@
                  <button id="request-video-button" class="icon-button" data-tooltip="Sugerir Video" title="Sugerir Video" style="display: none;">
                      <i class="fas fa-plus-circle"></i>
                  </button>
-                 <a href="admin.html" id="admin-header-link" class="icon-button" data-tooltip="Panel Admin" title="Panel Admin" style="display: none;">
-                    <i class="fas fa-shield-alt"></i>
-                 </a>
                 <button id="settings-button" class="icon-button" data-tooltip="Configuración" title="Configuración"><i class="fas fa-cog"></i></button>
                 <a href="chat.html" class="icon-button chat-icon-header" data-tooltip="Ir al Chat" title="Ir al Chat">
                     <i class="fas fa-comments"></i>
@@ -43,36 +82,137 @@
 
     <div id="settings-panel" class="settings-panel">
         <button id="close-settings-button" class="close-panel-button">×</button>
-        <h4>Configuración</h4>
-        <div class="settings-section"><h5>Tema</h5><div class="theme-swatches"><button class="theme-swatch active" data-theme="green" style="background-color:#00ff00;" title="Verde Neón"></button><button class="theme-swatch" data-theme="red" style="background-color:#ff1a1a;" title="Rojo Neón"></button><button class="theme-swatch" data-theme="purple" style="background-color:#9933ff;" title="Púrpura Neón"></button><button class="theme-swatch" data-theme="blue" style="background-color:#007bff;" title="Azul Neón"></button></div></div>
-        <div class="settings-section"><h5>Idioma</h5><div class="language-buttons"><button class="language-button active" data-lang="es">ES</button><button class="language-button" data-lang="en">EN</button></div></div>
-        <div class="settings-section"><h5><label for="particle-toggle">Partículas</label></h5><label class="switch"><input type="checkbox" id="particle-toggle" checked><span class="slider round"></span></label></div>
+        <h4 data-translate-key="settings_title">Ajustes</h4>
+        
+        <div class="settings-section">
+            <h5 data-translate-key="settings_theme_title">Tema de Color</h5>
+            <div class="theme-swatches">
+                <button class="theme-swatch active" data-theme="green" style="background-color: #00ff00;" title="Verde Neón"></button>
+                <button class="theme-swatch" data-theme="red" style="background-color: #ff1a1a;" title="Rojo Neón"></button>
+                <button class="theme-swatch" data-theme="purple" style="background-color: #9933ff;" title="Púrpura Neón"></button>
+                <button class="theme-swatch" data-theme="blue" style="background-color: #007bff;" title="Azul Neón"></button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h5 data-translate-key="settings_language_title">Idioma</h5>
+            <div class="language-buttons">
+                <button class="language-button active" data-lang="es" data-translate-key="lang_es">Español</button>
+                <button class="language-button" data-lang="en" data-translate-key="lang_en">English</button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h5 data-translate-key="settings_display_options">Opciones de Visualización</h5>
+            <div class="form-group">
+                <label for="particle-toggle" class="checkbox-label" data-translate-key="settings_particles">Efecto Partículas</label>
+                <label class="switch">
+                    <input type="checkbox" id="particle-toggle" data-setting="particlesEnabled" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="items-per-page" data-translate-key="settings_items_per_page">Elementos por página:</label>
+                <select id="items-per-page" data-setting="itemsPerPage">
+                    <option value="20">20</option>
+                    <option value="40" selected>40</option>
+                    <option value="60">60</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="font-size-slider" data-translate-key="settings_font_size">Tamaño de Fuente Global:</label>
+                <input type="range" id="font-size-slider" data-setting="globalFontSize" min="80" max="120" value="100" step="5">
+            </div>
+             <div class="form-group">
+                <label for="autoplay-videos" class="checkbox-label" data-translate-key="settings_autoplay">Autoplay Videos en Detalle</label>
+                <label class="switch">
+                    <input type="checkbox" id="autoplay-videos" data-setting="autoplayVideos">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h5 data-translate-key="settings_notifications">Notificaciones (Simulado)</h5>
+            <div class="form-group">
+                <label for="email-notifications" class="checkbox-label" data-translate-key="settings_email_notif">Notificaciones por Email</label>
+                <label class="switch">
+                    <input type="checkbox" id="email-notifications" data-setting="emailNotifications" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="push-notifications" class="checkbox-label" data-translate-key="settings_push_notif">Notificaciones Push</label>
+                <label class="switch">
+                    <input type="checkbox" id="push-notifications" data-setting="pushNotifications">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h5 data-translate-key="settings_privacy">Privacidad (Simulado)</h5>
+            <div class="form-group">
+                <label for="show-online-status" class="checkbox-label" data-translate-key="settings_show_online">Mostrar Estado Online</label>
+                <label class="switch">
+                    <input type="checkbox" id="show-online-status" data-setting="showOnlineStatus" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+             <div class="form-group">
+                <label for="search-history" class="checkbox-label" data-translate-key="settings_clear_search">Limpiar Historial de Búsqueda</label>
+                <button id="clear-search-history-btn" class="button-secondary small" data-translate-key="settings_clear_button">Limpiar</button>
+            </div>
+        </div>
+         <div class="settings-section">
+            <h5 data-translate-key="settings_accessibility">Accesibilidad (Simulado)</h5>
+            <div class="form-group">
+                <label for="high-contrast-mode" class="checkbox-label" data-translate-key="settings_high_contrast">Modo Alto Contraste</label>
+                <label class="switch">
+                    <input type="checkbox" id="high-contrast-mode" data-setting="highContrastMode">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="text-to-speech" class="checkbox-label" data-translate-key="settings_tts">Habilitar Texto a Voz</label>
+                <label class="switch">
+                    <input type="checkbox" id="text-to-speech" data-setting="textToSpeechEnabled">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <p style="opacity: 0.6; margin-top: 20px; text-align:center;" data-translate-key="settings_more_soon">(Más ajustes próximamente...)</p>
     </div>
 
     <div id="login-modal" class="modal">
          <div class="modal-content"><button class="close-modal" id="close-login-modal">×</button><h3 data-translate-key="login_modal_title">Iniciar Sesión / Registro</h3><form id="email-password-form"><div class="form-group"><label for="login-email" data-translate-key="login_email_label">Correo Electrónico</label><input type="email" id="login-email" required autocomplete="email"></div><div class="form-group"><label for="login-password" data-translate-key="login_password_label">Contraseña</label><input type="password" id="login-password" required autocomplete="current-password"></div><div class="form-error" id="login-error-message" style="display:none;"></div><div class="form-actions"><button type="button" class="button-secondary" id="signup-button" data-translate-key="login_signup_button">Registrarse</button><button type="button" class="button-primary" id="signin-button" data-translate-key="login_signin_button">Iniciar Sesión</button></div></form><div class="divider" data-translate-key="login_divider_or">O</div><button class="button-google" id="google-signin-button"><i class="fab fa-google"></i> <span data-translate-key="login_google_firebase">Continuar con Google</span></button><p class="modal-info-text" data-translate-key="login_modal_text_firebase">Regístrate o inicia sesión para acceder a todas las funciones.</p></div>
     </div>
 
-     <div id="request-video-modal" class="modal">
-         <div class="modal-content">
-             <button class="close-modal" id="close-request-video-modal">×</button>
-            <h3>Sugerir un Video</h3>
-            <form id="request-video-form">
-                 <div class="form-group"><label for="request-title">Título del Video:</label><input type="text" id="request-title" required></div>
-                 <div class="form-group"><label for="request-url">URL del Video (Opcional):</label><input type="url" id="request-url" placeholder="Enlace a YouTube, Vimeo, Drive, etc."></div>
-                 <div class="form-group"><label for="request-reason">Descripción o Razón:</label><textarea id="request-reason" rows="3" required placeholder="¿Por qué deberíamos añadir este video?"></textarea></div>
-                 <button type="submit" id="submit-request-button" class="button-primary">Enviar Sugerencia</button>
-            </form>
-             <div id="request-video-status" class="admin-status"></div>
-        </div>
-    </div>
-
     <main id="main-content">
         <h2 id="popular-title" data-translate-key="popular_title" style="margin-bottom: 20px;">Populares Ahora</h2>
         <div id="poster-container">
             <p id="loading-indicator" style="text-align: center; padding: 40px; color: var(--text-color-secondary);" data-translate-key="loading">Cargando...</p>
-            </div>
+        </div>
     </main>
+
+    <button id="admin-fab" class="floating-admin-button" title="Panel de Administrador" style="display: none;">
+        <i class="fas fa-shield-alt"></i>
+    </button>
+
+    <div id="request-video-modal" class="modal">
+         <div class="modal-content">
+             <button class="close-modal" id="close-request-video-modal">×</button>
+            <h3 data-translate-key="suggest_video_title">Sugerir un Video</h3>
+            <form id="request-video-form">
+                 <div class="form-group"><label for="request-title" data-translate-key="request_title_label">Título del Video:</label><input type="text" id="request-title" required></div>
+                 <div class="form-group"><label for="request-url" data-translate-key="request_url_label">URL del Video (Opcional):</label><input type="url" id="request-url" data-translate-key="request_url_placeholder" placeholder="Enlace a YouTube, Vimeo, Drive, etc."></div>
+                 <div class="form-group"><label for="request-reason" data-translate-key="request_reason_label">Descripción o Razón:</label><textarea id="request-reason" rows="3" required data-translate-key="request_reason_placeholder" placeholder="¿Por qué deberíamos añadir este video?"></textarea></div>
+                 <button type="submit" id="submit-request-button" class="button-primary" data-translate-key="submit_suggestion_button">Enviar Sugerencia</button>
+            </form>
+             <div id="request-video-status" class="admin-status"></div>
+        </div>
+    </div>
 
     <footer>
         <p>&copy; <span id="current-year">2025</span> Pornitoo - Todos los derechos reservados.</p>
