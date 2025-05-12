@@ -4,7 +4,7 @@ import {
     createUserWithEmailAndPassword, signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import {
-    getDatabase, ref, onValue, push, set, serverTimestamp
+    getDatabase, ref, onValue, push, set, serverTimestamp, update as firebaseUpdate
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 // Listener principal DOM Ready
@@ -28,13 +28,45 @@ function initializeAppLogic() {
     const $$ = (selector) => document.querySelectorAll(selector);
     const saveToLocalStorage = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.error("LocalStorage save error:", e); } };
     const loadFromLocalStorage = (key, defaultValue) => { try { const stored = localStorage.getItem(key); return stored ? JSON.parse(stored) : defaultValue; } catch (e) { console.error("LocalStorage load error:", e); return defaultValue; } };
-    function showLoginError(errorCode) { if (!loginErrorMessage) return; const lang = getCurrentLang(); const message = translations[lang]?.[errorCode] || translations[lang]?.['error_default'] || `Error: ${errorCode}`; loginErrorMessage.textContent = message; loginErrorMessage.style.display = 'block'; }
+    function showLoginError(errorCode) {
+        if (!loginErrorMessage) return;
+        const lang = getCurrentLang();
+        const message = translations[lang]?.[errorCode] || translations[lang]?.['error_default'] || `Error: ${errorCode}`;
+        loginErrorMessage.textContent = message;
+        loginErrorMessage.style.display = 'block';
+        // Auto hide after 5 seconds
+        setTimeout(() => hideLoginError(), 5000);
+    }
     function hideLoginError() { if (loginErrorMessage) { loginErrorMessage.textContent = ''; loginErrorMessage.style.display = 'none'; } }
     function escapeHTML(str) { const div = document.createElement('div'); div.appendChild(document.createTextNode(str || '')); return div.innerHTML; }
     function formatViews(views) { if (views === undefined || views === null) return '---'; if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M'; if (views >= 1000) return (views / 1000).toFixed(1) + 'K'; return views.toString(); }
     function formatDate(timestamp) { if (!timestamp) return '---'; try { const date = new Date(timestamp); const langForDate = currentLang || 'es'; return date.toLocaleDateString(langForDate + '-' + langForDate.toUpperCase(), { year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) { console.error("Error formatting date:", e); return 'Fecha inválida'; } }
-    function showStatusMessage(element, message, type = 'info', autoHideDelay = 0) { if (!element) return; element.textContent = message; element.className = 'admin-status'; element.classList.add(type); element.style.display = 'block'; if (autoHideDelay > 0) setTimeout(() => { if(element) element.style.display = 'none'; }, autoHideDelay); }
-
+    function showStatusMessage(element, message, type = 'info', autoHideDelay = 0) {
+        if (!element) return;
+        element.textContent = message;
+        element.className = 'admin-status'; // Reset class
+        element.classList.add(type);
+        element.style.display = 'block';
+        if (autoHideDelay > 0) setTimeout(() => {
+            if(element) element.style.display = 'none';
+        }, autoHideDelay);
+    }
+    function generateUniqueId() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
 
     // --- 0. Firebase Services y Constantes ---
     if (!window.firebaseApp) {
@@ -46,57 +78,153 @@ function initializeAppLogic() {
     const auth = getAuth(window.firebaseApp);
     const db = getDatabase(window.firebaseApp);
     const ADMIN_EMAILS = ["santosramonsteven@gmail.com", "evilgado6@gmail.com"];
+    // Constantes adicionales para funciones mejoradas
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1500;
+    const ANIMATION_DURATION = 300;
 
     // --- 1. Selectores Globales ---
-    const body = document.body; const root = document.documentElement;
-    const headerLogo = $('#header-logo'); const mainContent = $('#main-content');
+    const body = document.body;
+    const root = document.documentElement;
+    const headerLogo = $('#header-logo');
+    const mainContent = $('#main-content');
     const introAnimation = $('#intro-animation');
     const userAuthButton = $('#user-auth-button');
-    const userPhotoElement = document.createElement('img'); userPhotoElement.alt = 'User'; userPhotoElement.style.display = 'none';
-    if (userAuthButton) userAuthButton.appendChild(userPhotoElement);
+    const userPhotoElement = document.createElement('img');
+    userPhotoElement.alt = 'User';
+    userPhotoElement.style.display = 'none';
+    userPhotoElement.className = 'user-photo'; // Añadir clase para posible estilo
+    if (userAuthButton && !userAuthButton.querySelector('.user-photo')) userAuthButton.appendChild(userPhotoElement);
     const userIconElement = userAuthButton?.querySelector('i.fa-user');
-    const loginModal = $('#login-modal'); const loginEmailInput = $('#login-email');
-    const loginPasswordInput = $('#login-password'); const signUpButton = $('#signup-button');
-    const signInButton = $('#signin-button'); const googleSignInButton = $('#google-signin-button');
+    const loginModal = $('#login-modal');
+    const loginEmailInput = $('#login-email');
+    const loginPasswordInput = $('#login-password');
+    const signUpButton = $('#signup-button');
+    const signInButton = $('#signin-button');
+    const googleSignInButton = $('#google-signin-button');
     const loginErrorMessage = $('#login-error-message');
-    const settingsPanel = $('#settings-panel'); const settingsButton = $('#settings-button');
+    const settingsPanel = $('#settings-panel');
+    const settingsButton = $('#settings-button');
     const closeSettingsButton = $('#close-settings-button');
     const adminFab = $('#admin-fab');
     const requestVideoButton = $('#request-video-button');
-    const requestVideoModal = $('#request-video-modal'); const closeRequestVideoModal = $('#close-request-video-modal');
-    const requestVideoForm = $('#request-video-form'); const requestTitleInput = $('#request-title');
-    const requestUrlInput = $('#request-url'); const requestReasonInput = $('#request-reason');
-    const submitRequestButton = $('#submit-request-button'); const requestVideoStatus = $('#request-video-status');
-    const sidebarUserPhoto = $('#sidebar-user-photo'); const sidebarUserName = $('#sidebar-user-name');
+    const requestVideoModal = $('#request-video-modal');
+    const closeRequestVideoModal = $('#close-request-video-modal');
+    const requestVideoForm = $('#request-video-form');
+    const requestTitleInput = $('#request-title');
+    const requestUrlInput = $('#request-url');
+    const requestReasonInput = $('#request-reason');
+    const submitRequestButton = $('#submit-request-button');
+    const requestVideoStatus = $('#request-video-status');
+    const sidebarUserPhoto = $('#sidebar-user-photo');
+    const sidebarUserName = $('#sidebar-user-name');
+    // const searchForm = $('#search-form'); // Asumiendo que el search container es el form
+    const searchInput = $('#search-bar'); // ID del input de búsqueda en el header
+    // const searchButton = $('#search-button'); // ID del botón de búsqueda en el header
+    // const searchResults = $('#search-results'); // Necesitarás un div para mostrar resultados si implementas búsqueda
+    const backToTopButton = document.createElement('button');
+    backToTopButton.id = 'back-to-top';
+    backToTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    backToTopButton.style.display = 'none'; // Oculto inicialmente
+    document.body.appendChild(backToTopButton);
+
 
     // --- 2. Estado ---
-    let currentLang = 'es'; let particlesActive = true; let currentUser = null; let isAdmin = false;
-    let userSettings = {}; // Para guardar las nuevas configuraciones
+    let currentLang = 'es';
+    let particlesActive = true;
+    let currentUser = null;
+    let isAdmin = false;
+    let userSettings = {};
+    let isProcessingAuth = false; // Flag para evitar múltiples procesamientos de auth
+    let searchHistory = loadFromLocalStorage('searchHistoryPornitoo', []);
+    let lastScrollPosition = 0;
+    let ticking = false;
+
 
     // --- 3. Translations ---
     const translations = {
-        es: { index_page_title: "Inicio - Pornitoo", search_placeholder: "Buscar títulos...", search_button: "Buscar", login_tooltip: "Iniciar sesión", chat_tooltip: "Ir al Chat", settings_tooltip: "Configuración", popular_title: "Populares Ahora", loading: "Cargando...", settings_title: "Ajustes", settings_theme_title: "Tema de Color", settings_language_title: "Idioma", lang_es: "Español", lang_en: "English", settings_display_options: "Opciones de Visualización", settings_particles: "Efecto Partículas", settings_items_per_page: "Elementos por página:", settings_font_size: "Tamaño de Fuente Global:", settings_autoplay: "Autoplay Videos en Detalle", settings_notifications: "Notificaciones", settings_email_notif: "Notificaciones por Email", settings_push_notif: "Notificaciones Push", settings_privacy: "Privacidad", settings_show_online: "Mostrar Estado Online", settings_clear_search: "Limpiar Historial de Búsqueda", settings_clear_button: "Limpiar", settings_accessibility: "Accesibilidad", settings_high_contrast: "Modo Alto Contraste", settings_tts: "Habilitar Texto a Voz", settings_more_soon: "(Más ajustes próximamente...)", login_modal_title: "Iniciar Sesión / Registro", login_email_label: "Correo Electrónico", login_password_label: "Contraseña", login_signup_button: "Registrarse", login_signin_button: "Iniciar Sesión", login_divider_or: "O", login_google_firebase: "Continuar con Google", login_modal_text_firebase: "Regístrate o inicia sesión para acceder a todas las funciones.", back_button: "Volver", views_count: "Vistas", published_date: "Publicado:", related_videos_title: "Más Videos", description_title: "Descripción", comments_title: "Comentarios", logout_tooltip: "Cerrar sesión", chat_page_title: "Chat General", chat_loading: "Cargando mensajes...", chat_input_placeholder: "Escribe un mensaje...", no_related_videos: "No hay videos relacionados.", login_needed_for_chat: "Inicia sesión para chatear", login_needed_to_comment: "Inicia sesión para comentar", comment_placeholder: "Escribe tu comentario...", comment_send_button: "Enviar", suggest_video: "Sugerir Video", suggest_video_title: "Sugerir un Video", request_title_label: "Título del Video:", request_url_label: "URL del Video (Opcional):", request_url_placeholder: "Enlace a YouTube, Vimeo, Drive, etc.", request_reason_label: "Descripción o Razón:", request_reason_placeholder: "¿Por qué deberíamos añadir este video?", submit_suggestion_button: "Enviar Sugerencia", request_sent_success: "Sugerencia enviada. ¡Gracias!", login_needed_to_suggest: "Inicia sesión para sugerir videos", "auth/invalid-email": "Correo no válido.", "auth/user-disabled": "Cuenta deshabilitada.", "auth/email-already-in-use": "Correo ya registrado.", "auth/weak-password": "Contraseña >6 caracteres.", "auth/operation-not-allowed": "Login por correo no habilitado.", "auth/invalid-credential": "Credenciales inválidas.", "auth/missing-password": "Falta contraseña.", "auth/network-request-failed": "Error de red.", "auth/too-many-requests": "Demasiados intentos. Intenta más tarde.", "auth/popup-closed-by-user": "Login cancelado.", "error_default": "Error inesperado.", confirm_clear_search_history: "¿Seguro que quieres limpiar el historial de búsqueda? (Simulado)", search_history_cleared: "Historial de búsqueda limpiado (Simulado)." },
-        en: { index_page_title: "Home - Pornitoo", search_placeholder: "Search titles...", search_button: "Search", login_tooltip: "Login", chat_tooltip: "Go to Chat", settings_tooltip: "Settings", popular_title: "Popular Now", loading: "Loading...", settings_title: "Settings", settings_theme_title: "Color Theme", settings_language_title: "Language", lang_es: "Spanish", lang_en: "English", settings_display_options: "Display Options", settings_particles: "Particle Effect", settings_items_per_page: "Items per page:", settings_font_size: "Global Font Size:", settings_autoplay: "Autoplay Videos in Detail", settings_notifications: "Notifications", settings_email_notif: "Email Notifications", settings_push_notif: "Push Notifications", settings_privacy: "Privacy", settings_show_online: "Show Online Status", settings_clear_search: "Clear Search History", settings_clear_button: "Clear", settings_accessibility: "Accessibility", settings_high_contrast: "High Contrast Mode", settings_tts: "Enable Text-to-Speech", settings_more_soon: "(More settings coming soon...)", login_modal_title: "Login / Sign Up", login_email_label: "Email Address", login_password_label: "Password", login_signup_button: "Sign Up", login_signin_button: "Sign In", login_divider_or: "OR", login_google_firebase: "Continue with Google", login_modal_text_firebase: "Sign up or log in to access all features.", back_button: "Back", views_count: "Views", published_date: "Published:", related_videos_title: "More Videos", description_title: "Description", comments_title: "Comments", logout_tooltip: "Sign out", chat_page_title: "General Chat", chat_loading: "Loading messages...", chat_input_placeholder: "Type a message...", no_related_videos: "No related videos found.", login_needed_for_chat: "Log in to chat", login_needed_to_comment: "Log in to comment", comment_placeholder: "Write your comment...", comment_send_button: "Send", suggest_video: "Suggest Video", suggest_video_title: "Suggest a Video", request_title_label: "Video Title:", request_url_label: "Video URL (Optional):", request_url_placeholder: "Link to YouTube, Vimeo, Drive, etc.", request_reason_label: "Description or Reason:", request_reason_placeholder: "Why should we add this video?", submit_suggestion_button: "Send Suggestion", request_sent_success: "Suggestion sent. Thank you!", login_needed_to_suggest: "Log in to suggest videos", "auth/invalid-email": "Invalid email.", "auth/user-disabled": "Account disabled.", "auth/email-already-in-use": "Email already registered.", "auth/weak-password": "Password >6 chars.", "auth/operation-not-allowed": "Email login not enabled.", "auth/invalid-credential": "Invalid credentials.", "auth/missing-password": "Password missing.", "auth/network-request-failed": "Network error.", "auth/too-many-requests": "Too many attempts. Try later.", "auth/popup-closed-by-user": "Login canceled.", "error_default": "Unexpected error.", confirm_clear_search_history: "Are you sure you want to clear search history? (Simulated)", search_history_cleared: "Search history cleared! (Simulated)." }
+        es: { index_page_title: "Inicio - Pornitoo", search_placeholder: "Buscar títulos...", search_button: "Buscar", login_tooltip: "Iniciar sesión", chat_tooltip: "Ir al Chat", settings_tooltip: "Configuración", popular_title: "Populares Ahora", loading: "Cargando...", settings_title: "Ajustes", settings_theme_title: "Tema de Color", settings_language_title: "Idioma", lang_es: "Español", lang_en: "English", settings_display_options: "Opciones de Visualización", settings_particles: "Efecto Partículas", settings_items_per_page: "Elementos por página:", settings_font_size: "Tamaño de Fuente Global:", settings_autoplay: "Autoplay Videos en Detalle", settings_notifications: "Notificaciones", settings_email_notif: "Notificaciones por Email", settings_push_notif: "Notificaciones Push", settings_privacy: "Privacidad", settings_show_online: "Mostrar Estado Online", settings_clear_search: "Limpiar Historial de Búsqueda", settings_clear_button: "Limpiar", settings_accessibility: "Accesibilidad", settings_high_contrast: "Modo Alto Contraste", settings_tts: "Habilitar Texto a Voz", settings_more_soon: "(Más ajustes próximamente...)", login_modal_title: "Iniciar Sesión / Registro", login_email_label: "Correo Electrónico", login_password_label: "Contraseña", login_signup_button: "Registrarse", login_signin_button: "Iniciar Sesión", login_divider_or: "O", login_google_firebase: "Continuar con Google", login_modal_text_firebase: "Regístrate o inicia sesión para acceder a todas las funciones.", back_button: "Volver", views_count: "Vistas", published_date: "Publicado:", related_videos_title: "Más Videos", description_title: "Descripción", comments_title: "Comentarios", logout_tooltip: "Cerrar sesión", chat_page_title: "Chat General", chat_loading: "Cargando mensajes...", chat_input_placeholder: "Escribe un mensaje...", no_related_videos: "No hay videos relacionados.", login_needed_for_chat: "Inicia sesión para chatear", login_needed_to_comment: "Inicia sesión para comentar", comment_placeholder: "Escribe tu comentario...", comment_send_button: "Enviar", suggest_video: "Sugerir Video", suggest_video_title: "Sugerir un Video", request_title_label: "Título del Video:", request_url_label: "URL del Video (Opcional):", request_url_placeholder: "Enlace a YouTube, Vimeo, Drive, etc.", request_reason_label: "Descripción o Razón:", request_reason_placeholder: "¿Por qué deberíamos añadir este video?", submit_suggestion_button: "Enviar Sugerencia", request_sent_success: "Sugerencia enviada. ¡Gracias!", login_needed_to_suggest: "Inicia sesión para sugerir videos", "auth/invalid-email": "Correo no válido.", "auth/user-disabled": "Cuenta deshabilitada.", "auth/email-already-in-use": "Correo ya registrado.", "auth/weak-password": "Contraseña >6 caracteres.", "auth/operation-not-allowed": "Login por correo no habilitado.", "auth/invalid-credential": "Credenciales inválidas.", "auth/missing-password": "Falta contraseña.", "auth/network-request-failed": "Error de red.", "auth/too-many-requests": "Demasiados intentos. Intenta más tarde.", "auth/popup-closed-by-user": "Login cancelado.", "error_default": "Error inesperado.", confirm_clear_search_history: "¿Seguro que quieres limpiar el historial de búsqueda?", search_history_cleared: "Historial de búsqueda limpiado." },
+        en: { index_page_title: "Home - Pornitoo", search_placeholder: "Search titles...", search_button: "Search", login_tooltip: "Login", chat_tooltip: "Go to Chat", settings_tooltip: "Settings", popular_title: "Popular Now", loading: "Loading...", settings_title: "Settings", settings_theme_title: "Color Theme", settings_language_title: "Language", lang_es: "Spanish", lang_en: "English", settings_display_options: "Display Options", settings_particles: "Particle Effect", settings_items_per_page: "Items per page:", settings_font_size: "Global Font Size:", settings_autoplay: "Autoplay Videos in Detail", settings_notifications: "Notifications", settings_email_notif: "Email Notifications", settings_push_notif: "Push Notifications", settings_privacy: "Privacy", settings_show_online: "Show Online Status", settings_clear_search: "Clear Search History", settings_clear_button: "Clear", settings_accessibility: "Accessibility", settings_high_contrast: "High Contrast Mode", settings_tts: "Enable Text-to-Speech", settings_more_soon: "(More settings coming soon...)", login_modal_title: "Login / Sign Up", login_email_label: "Email Address", login_password_label: "Password", login_signup_button: "Sign Up", login_signin_button: "Sign In", login_divider_or: "OR", login_google_firebase: "Continue with Google", login_modal_text_firebase: "Sign up or log in to access all features.", back_button: "Back", views_count: "Views", published_date: "Published:", related_videos_title: "More Videos", description_title: "Description", comments_title: "Comments", logout_tooltip: "Sign out", chat_page_title: "General Chat", chat_loading: "Loading messages...", chat_input_placeholder: "Type a message...", no_related_videos: "No related videos found.", login_needed_for_chat: "Log in to chat", login_needed_to_comment: "Log in to comment", comment_placeholder: "Write your comment...", comment_send_button: "Send", suggest_video: "Suggest Video", suggest_video_title: "Suggest a Video", request_title_label: "Video Title:", request_url_label: "Video URL (Optional):", request_url_placeholder: "Link to YouTube, Vimeo, Drive, etc.", request_reason_label: "Description or Reason:", request_reason_placeholder: "Why should we add this video?", submit_suggestion_button: "Send Suggestion", request_sent_success: "Suggestion sent. Thank you!", login_needed_to_suggest: "Log in to suggest videos", "auth/invalid-email": "Invalid email.", "auth/user-disabled": "Account disabled.", "auth/email-already-in-use": "Email already registered.", "auth/weak-password": "Password >6 chars.", "auth/operation-not-allowed": "Email login not enabled.", "auth/invalid-credential": "Invalid credentials.", "auth/missing-password": "Password missing.", "auth/network-request-failed": "Network error.", "auth/too-many-requests": "Too many attempts. Try later.", "auth/popup-closed-by-user": "Login canceled.", "error_default": "Unexpected error.", confirm_clear_search_history: "Are you sure you want to clear search history?", search_history_cleared: "Search history cleared!" }
     };
+
+    function getCurrentLang() {
+        return currentLang;
+    }
+
+    // --- 4. Scroll Handler ---
+    const scrollHandler = (() => {
+        function handleScroll() {
+            const scrollY = window.scrollY;
+            // Back to top button logic
+            if (backToTopButton) {
+                if (scrollY > 300) { backToTopButton.style.display = 'block'; }
+                else { backToTopButton.style.display = 'none'; }
+            }
+            // Header visibility logic (add a header class if needed)
+            const header = document.querySelector('header');
+            if (header) {
+                if (scrollY > 100) { header.classList.add('scrolled'); }
+                else { header.classList.remove('scrolled'); }
+            }
+            lastScrollPosition = scrollY;
+        }
+        function init() {
+            window.addEventListener('scroll', () => { if (!ticking) { window.requestAnimationFrame(() => { handleScroll(); ticking = false; }); ticking = true; } });
+            if (backToTopButton) {
+                backToTopButton.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+            }
+        }
+        return { init };
+    })();
 
     // --- 5. Gestor de Temas ---
     const themeManager = (() => {
         const swatches = $$('.theme-swatch');
-        const themes = { green: { '--primary-color': '#00ff00', '--neon-glow': '0 0 10px rgba(0, 255, 0, 0.7)' }, red: { '--primary-color': '#ff1a1a', '--neon-glow': '0 0 12px rgba(255, 26, 26, 0.8)' }, purple: { '--primary-color': '#9933ff', '--neon-glow': '0 0 12px rgba(153, 51, 255, 0.8)' }, blue: { '--primary-color': '#007bff', '--neon-glow': '0 0 10px rgba(0, 123, 255, 0.7)' }};
-        function applyTheme(themeName) { const theme = themes[themeName]; if (!theme) { console.warn(`Theme '${themeName}' not found...`); themeName = 'green'; } const activeTheme = themes[themeName]; Object.entries(activeTheme).forEach(([variable, value]) => { root.style.setProperty(variable, value); }); swatches.forEach(swatch => { swatch.classList.toggle('active', swatch.dataset.theme === themeName); }); updatePlaceholderImageColors(activeTheme['--primary-color'] || themes.green['--primary-color']); saveToLocalStorage('selectedThemePornitoo', themeName); }
-        function updatePlaceholderImageColors(colorHex) { const color = colorHex.substring(1); $$('img[src*="via.placeholder.com"]').forEach(img => { const currentSrc = img.getAttribute('src'); if (!currentSrc) return; let newSrc = currentSrc; const colorRegex = /\/([0-9a-fA-F]{3,6})\?text=/; if (currentSrc.includes('/theme?text=')) { newSrc = currentSrc.replace('/theme?text=', `/${color}?text=`); } else { const match = currentSrc.match(colorRegex); if (match && match[1]) { newSrc = currentSrc.replace(colorRegex, `/${color}?text=`); } } if (newSrc !== currentSrc) { img.src = newSrc; } }); }
-        function init() { swatches.forEach(swatch => { swatch.addEventListener('click', () => applyTheme(swatch.dataset.theme)); }); const savedTheme = loadFromLocalStorage('selectedThemePornitoo', 'green'); applyTheme(savedTheme); }
-        return { init, applyTheme };
+        const themes = {
+            green: { '--primary-color': '#00ff00', '--neon-glow': '0 0 10px rgba(0, 255, 0, 0.7)', '--accent-color': '#00cc00' },
+            red: { '--primary-color': '#ff1a1a', '--neon-glow': '0 0 12px rgba(255, 26, 26, 0.8)', '--accent-color': '#cc0000' },
+            purple: { '--primary-color': '#9933ff', '--neon-glow': '0 0 12px rgba(153, 51, 255, 0.8)', '--accent-color': '#7700cc' },
+            blue: { '--primary-color': '#007bff', '--neon-glow': '0 0 10px rgba(0, 123, 255, 0.7)', '--accent-color': '#0056b3' }
+        };
+        function applyTheme(themeName) {
+            const theme = themes[themeName];
+            if (!theme) { console.warn(`Theme '${themeName}' not found. Defaulting to green.`); themeName = 'green'; }
+            const activeTheme = themes[themeName];
+            Object.entries(activeTheme).forEach(([variable, value]) => { root.style.setProperty(variable, value); });
+            swatches.forEach(swatch => { swatch.classList.toggle('active', swatch.dataset.theme === themeName); });
+            updatePlaceholderImageColors(activeTheme['--primary-color'] || themes.green['--primary-color']);
+            saveToLocalStorage('selectedThemePornitoo', themeName);
+            document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: themeName } }));
+        }
+        function updatePlaceholderImageColors(colorHex) {
+            const color = colorHex.substring(1);
+            $$('img[src*="via.placeholder.com"]').forEach(img => {
+                const currentSrc = img.getAttribute('src'); if (!currentSrc) return;
+                let newSrc = currentSrc; const colorRegex = /\/([0-9a-fA-F]{3,6})\?text=/;
+                if (currentSrc.includes('/theme?text=')) { newSrc = currentSrc.replace('/theme?text=', `/${color}?text=`); }
+                else { const match = currentSrc.match(colorRegex); if (match && match[1]) { newSrc = currentSrc.replace(colorRegex, `/${color}?text=`); } }
+                if (newSrc !== currentSrc) { img.src = newSrc; }
+            });
+        }
+        function getThemeColor() { const currentTheme = loadFromLocalStorage('selectedThemePornitoo', 'green'); return themes[currentTheme]['--primary-color'] || themes.green['--primary-color'];}
+        function init() {
+            swatches.forEach(swatch => { swatch.addEventListener('click', () => applyTheme(swatch.dataset.theme)); });
+            const savedTheme = loadFromLocalStorage('selectedThemePornitoo', 'green');
+            applyTheme(savedTheme);
+        }
+        return { init, applyTheme, getThemeColor };
     })();
 
-    // --- 6. Gestor de Idioma (REVISADO) ---
+    // --- 6. Gestor de Idioma (MEJORADO) ---
     const languageManager = (() => {
         const langButtons = $$('.language-button');
+        let translationCache = {};
         function setLanguage(lang) {
             if (!translations[lang]) { console.warn(`Language data for '${lang}' not found. Defaulting to '${currentLang}'.`); lang = currentLang; }
             console.log(`Setting language to: ${lang}`); currentLang = lang; document.documentElement.lang = lang; window.currentLang = lang;
+            if (!translationCache[lang]) { translationCache[lang] = {}; Object.keys(translations[lang]).forEach(key => { translationCache[lang][key] = translations[lang][key]; }); }
             $$('[data-translate-key]').forEach(el => {
-                const key = el.dataset.translateKey; const translation = translations[lang]?.[key];
+                const key = el.dataset.translateKey; const translation = translationCache[lang]?.[key];
                 if (translation !== undefined) {
                     if (el.placeholder !== undefined) { el.placeholder = translation; }
                     else if (el.dataset.tooltip !== undefined) { el.dataset.tooltip = translation; if(el.tagName === 'DIV' || el.tagName === 'A' || el.tagName === 'BUTTON' || el.tagName === 'I') { el.setAttribute('title', translation); } }
@@ -104,35 +232,120 @@ function initializeAppLogic() {
                     else { el.textContent = translation; }
                 }
             });
-            updateAuthButtonUI(currentUser); // Asegurar que el tooltip del botón de auth se actualice
+            updateAuthButtonUI(currentUser);
             langButtons.forEach(button => { button.classList.toggle('active', button.dataset.lang === lang); });
             saveToLocalStorage('selectedLangPornitoo', lang);
+            document.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
         }
-        function getCurrentLang() { return currentLang; }
+        function getTranslation(key, fallback = '') { return translations[currentLang]?.[key] || fallback; }
         function init() {
-            const savedLang = loadFromLocalStorage('selectedLangPornitoo', 'es');
-            currentLang = savedLang; // Establecer estado inicial
-            window.currentLang = currentLang;
-            // La primera llamada a setLanguage se hará después de que auth esté listo (en onAuthStateChanged)
-            // para asegurar que todos los elementos (incluyendo el botón de auth) se traduzcan correctamente.
+            const savedLang = loadFromLocalStorage('selectedLangPornitoo', 'es'); currentLang = savedLang; window.currentLang = currentLang;
             langButtons.forEach(button => { button.addEventListener('click', (e) => { const newLang = e.target.dataset.lang; if (newLang) setLanguage(newLang); }); });
         }
-        return { init, setLanguage, getCurrentLang };
+        return { init, setLanguage, getCurrentLang, getTranslation };
     })();
 
-    // --- 7. Gestor de Partículas ---
+    // --- 7. Gestor de Partículas (MEJORADO) ---
     const particleManager = (() => {
-        const container = $('#particles'); const toggle = $('#particle-toggle'); let isActive = true;
-        function createParticles(count = 50) { if (!container || !root) return; container.innerHTML = ''; const currentPrimaryColor = getComputedStyle(root).getPropertyValue('--primary-color').trim(); if (!currentPrimaryColor) { console.warn("Could not get primary color for particles."); return; } for (let i = 0; i < count; i++) { const particle = document.createElement('div'); particle.classList.add('particle'); particle.style.backgroundColor = currentPrimaryColor; const size = Math.random() * 3 + 1; particle.style.width = `${size}px`; particle.style.height = `${size}px`; const xStart = Math.random() * 100; particle.style.left = `${xStart}vw`; particle.style.setProperty('--x-start', `${xStart}vw`); particle.style.setProperty('--x-end', `${xStart + (Math.random() * 40 - 20)}vw`); const duration = Math.random() * 20 + 15; particle.style.animationDuration = `${duration}s`; particle.style.animationDelay = `-${Math.random() * duration}s`; container.appendChild(particle); } container.classList.toggle('active', isActive); }
-        function toggleParticles(forceState) { isActive = forceState !== undefined ? forceState : !isActive; if(container) container.classList.toggle('active', isActive); if(toggle) toggle.checked = isActive; saveToLocalStorage('particlesActivePornitoo', isActive); }
-        function init() { isActive = loadFromLocalStorage('particlesActivePornitoo', true) === true; if (toggle) { toggle.checked = isActive; toggle.addEventListener('change', () => toggleParticles(toggle.checked)); } if (container && isActive) { setTimeout(createParticles, 100); } else if (container) { container.classList.remove('active'); } }
-        return { init, toggle: toggleParticles, create: createParticles };
+        const container = $('#particles');
+        const toggle = $('#particle-toggle');
+        let isActive = true;
+        let animationFrame;
+        let particles = [];
+
+        class Particle {
+            constructor(pContainer, color) {
+                this.element = document.createElement('div');
+                this.element.classList.add('particle');
+                this.element.style.backgroundColor = color;
+
+                const size = Math.random() * 3 + 1;
+                this.element.style.width = `${size}px`;
+                this.element.style.height = `${size}px`;
+
+                const xStart = Math.random() * 100;
+                this.element.style.left = `${xStart}vw`;
+                this.element.style.setProperty('--x-start', `${xStart}vw`);
+                this.element.style.setProperty('--x-end', `${xStart + (Math.random() * 40 - 20)}vw`);
+
+                const duration = Math.random() * 20 + 15;
+                this.element.style.animationDuration = `${duration}s`;
+                this.element.style.animationDelay = `-${Math.random() * duration}s`;
+
+                pContainer.appendChild(this.element);
+            }
+        }
+
+        function createParticles(count = 50) {
+            if (!container || !root) return;
+            clearParticles();
+            const currentPrimaryColor = getComputedStyle(root).getPropertyValue('--primary-color').trim();
+            if (!currentPrimaryColor) { console.warn("Could not get primary color for particles."); return; }
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(container, currentPrimaryColor));
+            }
+            container.classList.toggle('active', isActive);
+        }
+
+        function clearParticles() {
+            if (!container) return;
+            container.innerHTML = '';
+            particles = [];
+            if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = null; }
+        }
+
+        function toggleParticles(forceState) {
+            isActive = forceState !== undefined ? forceState : !isActive;
+            if (container) {
+                container.classList.toggle('active', isActive);
+                if (isActive && container.children.length === 0) { createParticles(); }
+            }
+            if (toggle) toggle.checked = isActive;
+            saveToLocalStorage('particlesActivePornitoo', isActive);
+            document.dispatchEvent(new CustomEvent('particlesToggled', { detail: { active: isActive } }));
+        }
+
+        function handleThemeChange() {
+            if (isActive && container) { createParticles(); }
+        }
+
+        function init() {
+            isActive = loadFromLocalStorage('particlesActivePornitoo', true) === true;
+            if (toggle) { toggle.checked = isActive; toggle.addEventListener('change', () => toggleParticles(toggle.checked)); }
+            if (container && isActive) { setTimeout(createParticles, 100); }
+            else if (container) { container.classList.remove('active'); }
+            document.addEventListener('themeChanged', handleThemeChange);
+        }
+        return { init, toggle: toggleParticles, create: createParticles, clear: clearParticles };
     })();
 
-    // --- 8. Gestor de UI (Modales Comunes) ---
+    // --- 8. Gestor de UI (Modales Comunes) (MEJORADO) ---
     const uiManager = (() => {
-        function togglePanel(panel, forceState) { if (!panel) return; const isVisible = panel.classList.contains('visible'); const shouldBeVisible = forceState === undefined ? !isVisible : forceState; if (isVisible !== shouldBeVisible) { panel.classList.toggle('visible', shouldBeVisible); } }
-        function toggleModal(modal, forceState) { if (!modal) return; const isVisible = modal.classList.contains('visible'); const shouldBeVisible = forceState === undefined ? !isVisible : forceState; if (isVisible !== shouldBeVisible) { modal.classList.toggle('visible', shouldBeVisible); } if (shouldBeVisible) hideLoginError(); if (!shouldBeVisible) { if(modal === requestVideoModal) requestVideoForm?.reset(); } }
+        let openModals = [];
+        function togglePanel(panel, forceState) {
+            if (!panel) return;
+            const isVisible = panel.classList.contains('visible');
+            const shouldBeVisible = forceState === undefined ? !isVisible : forceState;
+            if (isVisible !== shouldBeVisible) { panel.classList.toggle('visible', shouldBeVisible); }
+        }
+        function toggleModal(modal, forceState) {
+            if (!modal) return;
+            const isVisible = modal.classList.contains('visible');
+            const shouldBeVisible = forceState === undefined ? !isVisible : forceState;
+
+            if (isVisible !== shouldBeVisible) {
+                modal.classList.toggle('visible', shouldBeVisible);
+                if (shouldBeVisible) {
+                    openModals.push(modal);
+                    hideLoginError(); // Limpiar errores de login al abrir CUALQUIER modal
+                } else {
+                    openModals = openModals.filter(m => m !== modal);
+                    // Limpiar formularios específicos al cerrar
+                    if (modal === requestVideoModal && requestVideoForm) requestVideoForm.reset();
+                    // Añadir limpieza para otros modales si es necesario
+                }
+            }
+        }
         function init() {
              if (settingsButton && settingsPanel && closeSettingsButton) { settingsButton.addEventListener('click', (e) => { e.stopPropagation(); togglePanel(settingsPanel); }); closeSettingsButton.addEventListener('click', () => togglePanel(settingsPanel, false)); document.addEventListener('click', (e) => { if (settingsPanel?.classList.contains('visible') && !settingsPanel.contains(e.target) && e.target !== settingsButton && !settingsButton?.contains(e.target)) { togglePanel(settingsPanel, false); } }, true); }
              if (loginModal && $('#close-login-modal')) { $('#close-login-modal').addEventListener('click', () => toggleModal(loginModal, false)); loginModal.addEventListener('click', (e) => { if (e.target === loginModal) toggleModal(loginModal, false); }); if (googleSignInButton) googleSignInButton.addEventListener('click', () => { hideLoginError(); authManager.signInWithGoogle(); }); if (signUpButton) signUpButton.addEventListener('click', () => { hideLoginError(); authManager.signUpWithEmailPassword(loginEmailInput.value, loginPasswordInput.value); }); if (signInButton) signInButton.addEventListener('click', () => { hideLoginError(); authManager.signInWithEmailPassword(loginEmailInput.value, loginPasswordInput.value); }); }
@@ -140,7 +353,7 @@ function initializeAppLogic() {
              if(requestVideoModal && closeRequestVideoModal) closeRequestVideoModal.addEventListener('click', () => toggleModal(requestVideoModal, false));
              if(requestVideoModal) requestVideoModal.addEventListener('click', (e) => { if(e.target === requestVideoModal) toggleModal(requestVideoModal, false); });
         }
-        window.uiManager = { toggleModal };
+        window.uiManager = { toggleModal, togglePanel, getOpenModals: () => openModals, closeAllModals: () => openModals.forEach(m => toggleModal(m, false)) };
         return { init, toggleModal, togglePanel };
     })();
 
@@ -156,10 +369,9 @@ function initializeAppLogic() {
             onAuthStateChanged(auth, (user) => {
                  console.log("Main Script Auth State Changed:", user ? `User Logged In (${user.uid})` : "User Logged Out");
                  const wasLoggedIn = !!currentUser; currentUser = user; isAdmin = checkAdminStatus(user);
-                 updateAuthButtonUI(user); // Actualiza el botón de auth y sidebar
+                 updateAuthButtonUI(user);
                  if (adminFab) adminFab.style.display = isAdmin ? 'flex' : 'none';
                  if (requestVideoButton) requestVideoButton.style.display = (user && !isAdmin) ? 'flex' : 'none';
-                 // Setear el idioma al cambiar estado de auth o al cargar si no había usuario
                  if (!wasLoggedIn || !user) { languageManager.setLanguage(languageManager.getCurrentLang()); }
                  if (document.getElementById('detail-view-container')) { const detailVideoId = new URLSearchParams(window.location.search).get('id'); if (detailVideoId) setupCommentForm(detailVideoId); }
                  setupRequestForm();
@@ -174,10 +386,10 @@ function initializeAppLogic() {
 
     // --- 10. Update UI Auth Button/Sidebar ---
     function updateAuthButtonUI(user) {
-         const userAuthBtn = $('#user-auth-button'); const userPhoto = userAuthBtn?.querySelector('img'); const userIcon = userAuthBtn?.querySelector('i.fa-user');
+         const userAuthBtn = $('#user-auth-button'); const userPhoto = userAuthBtn?.querySelector('img.user-photo'); const userIcon = userAuthBtn?.querySelector('i.fa-user');
          const sidebarPhoto = $('#sidebar-user-photo'); const sidebarName = $('#sidebar-user-name');
          if (!userAuthBtn || !userPhoto || !userIcon) { console.warn("Header auth elements not found for UI update."); }
-         const currentLangForTooltip = languageManager.getCurrentLang ? languageManager.getCurrentLang() : 'es'; // Asegurar que currentLang esté disponible
+         const currentLangForTooltip = languageManager.getCurrentLang ? languageManager.getCurrentLang() : 'es';
          if (user) {
              if(userAuthBtn) userAuthBtn.classList.add('logged-in');
              const photoURL = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'U')}&background=random&color=fff&size=40`;
@@ -205,30 +417,22 @@ function initializeAppLogic() {
             const posterContainer = $('#poster-container'); const loadingIndicator = $('#loading-indicator');
             if (!posterContainer || !loadingIndicator) { console.error("Index page elements missing for posters"); return; }
             posterContainer.innerHTML = '';
-            const itemsToDisplay = parseInt(userSettings.itemsPerPage || 20, 10); // CAMBIADO A 20 por defecto
+            const itemsToDisplay = parseInt(userSettings.itemsPerPage || 20, 10);
             console.log(`[PAGELOGIC] Displaying ${itemsToDisplay} posters.`);
             for (let i = 1; i <= itemsToDisplay; i++) {
-                const videoId = `sim-placeholder-${i}`; // ID único para placeholders
-                const themeColorForPlaceholder = (getComputedStyle(root).getPropertyValue('--primary-color').trim() || '#00ff00').substring(1);
-                // Generar un color de fondo aleatorio para el placeholder de imagen
+                const videoId = `sim-placeholder-${i}`;
+                const themeColorForPlaceholder = (themeManager.getThemeColor ? themeManager.getThemeColor() : '#00ff00').substring(1);
                 const randomBgColor = Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-                const posterUrl = `https://via.placeholder.com/300x300/${randomBgColor}/ffffff?text=+`; // Sin texto explícito
-
+                const posterUrl = `https://via.placeholder.com/300x300/${randomBgColor}/ffffff?text=+`;
                 const errorImgSrc = `https://via.placeholder.com/300x300/ff0000/fff?text=Error`;
                 const posterItem = document.createElement('a');
-                // Los posters de placeholder no necesitan enlazar a detail.html si no tienen datos reales
-                // posterItem.href = `detail.html?id=${videoId}`;
-                posterItem.href = `#placeholder-${videoId}`; // Enlace de placeholder
-                posterItem.classList.add('poster-item', 'placeholder-poster'); // Clase adicional
+                posterItem.href = `#placeholder-${videoId}`;
+                posterItem.classList.add('poster-item', 'placeholder-poster');
                 posterItem.dataset.id = videoId;
-                posterItem.innerHTML = `
-                    <div class="poster">
-                        <img src="${posterUrl}" alt="Poster Placeholder" loading="lazy" onerror="this.onerror=null; this.src='${errorImgSrc}';">
-                    </div>
-                    `;
+                posterItem.innerHTML = ` <div class="poster"> <img src="${posterUrl}" alt="Poster Placeholder" loading="lazy" onerror="this.onerror=null; this.src='${errorImgSrc}';"> </div> `;
                 posterContainer.appendChild(posterItem);
             }
-            themeManager.applyTheme(loadFromLocalStorage('selectedThemePornitoo', 'green')); // Aplicar tema a placeholders
+            // themeManager.applyTheme(loadFromLocalStorage('selectedThemePornitoo', 'green')); // Ya se aplica al inicio
             loadingIndicator.style.display = 'none';
         }
 
@@ -240,19 +444,16 @@ function initializeAppLogic() {
             const detailDescription = $('#detail-description'); const videoPlayerIframe = $('#video-player-iframe');
             const relatedContainer = $('#related-items-container'); const videoLoadingIndicator = $('#video-loading-indicator');
 
-            if (!itemId || itemId.startsWith('sim-placeholder-')) { // No cargar datos para placeholders
+            if (!itemId || itemId.startsWith('sim-placeholder-')) {
                  console.warn("Placeholder item clicked or no item ID. Detail page will show defaults.");
                  if (detailTitle) detailTitle.textContent = "Video de Ejemplo";
                  if (pageTitleElement) pageTitleElement.textContent = "Detalle Ejemplo - Pornitoo";
                  if (detailDescription) detailDescription.textContent = "Esta es una descripción de ejemplo para un video placeholder.";
-                 if (videoPlayerIframe) videoPlayerIframe.src = ""; // O un video de ejemplo
+                 if (videoPlayerIframe) videoPlayerIframe.src = "";
                  if (videoLoadingIndicator) videoLoadingIndicator.style.display = 'none';
                  if (relatedContainer) relatedContainer.innerHTML = '<p style="opacity:0.7;">(Relacionados no disponibles para placeholders)</p>';
-                 // No cargar comentarios para placeholders
-                 const commentsContainer = $('#comments-container');
-                 if (commentsContainer) commentsContainer.innerHTML = '<p style="opacity:0.7;">Comentarios no disponibles para placeholders.</p>';
-                 const addCommentForm = $('#add-comment-form');
-                 if (addCommentForm) addCommentForm.style.display = 'none';
+                 const commentsContainer = $('#comments-container'); if (commentsContainer) commentsContainer.innerHTML = '<p style="opacity:0.7;">Comentarios no disponibles para placeholders.</p>';
+                 const addCommentForm = $('#add-comment-form'); if (addCommentForm) addCommentForm.style.display = 'none';
                  return;
             }
 
@@ -373,41 +574,94 @@ function initializeAppLogic() {
         });
     }
 
-    // --- 14. Lógica de Ajustes Avanzados ---
+    // --- 14. Lógica de Ajustes Avanzados (COMPLETO) ---
     const settingsManager = (() => {
-        const defaultSettings = { particlesEnabled: true, itemsPerPage: "20", globalFontSize: "100", autoplayVideos: false, emailNotifications: true, pushNotifications: false, showOnlineStatus: true, highContrastMode: false, textToSpeechEnabled: false };
-        function loadSettings() { userSettings = loadFromLocalStorage('userPornitooSettings', defaultSettings); applySettings(); updateSettingsUI(); }
-        function saveSetting(key, value) { userSettings[key] = value; saveToLocalStorage('userPornitooSettings', userSettings); applySetting(key, value); }
-        function applySettings() { console.log("Applying all user settings:", userSettings); Object.entries(userSettings).forEach(([key, value]) => { applySetting(key, value); }); }
+        const defaultSettings = {
+            particlesEnabled: true,
+            itemsPerPage: "20",
+            globalFontSize: "100",
+            autoplayVideos: false,
+            emailNotifications: true,
+            pushNotifications: false,
+            showOnlineStatus: true,
+            highContrastMode: false,
+            textToSpeechEnabled: false,
+            videoQualityDefault: "auto",
+            subtitleLanguage: "es",
+            downloadOverWifiOnly: true,
+            enableMatureContentFilter: false,
+            preferredAudioTrack: "original",
+            playbackSpeed: "1.0",
+            loopVideosByDefault: false,
+            showVideoPreviewOnHover: true,
+            enableKeyboardShortcuts: true,
+            dataSaverMode: false
+        };
+
+        function loadSettings() {
+            userSettings = loadFromLocalStorage('userPornitooSettings_v2', defaultSettings);
+            applySettings();
+            updateSettingsUI();
+        }
+
+        function saveSetting(key, value) {
+            userSettings[key] = value;
+            saveToLocalStorage('userPornitooSettings_v2', userSettings);
+            applySetting(key, value);
+        }
+
+        function applySettings() {
+            console.log("Applying all user settings:", userSettings);
+            Object.entries(userSettings).forEach(([key, value]) => {
+                applySetting(key, value);
+            });
+        }
+
         function applySetting(key, value) {
             console.log(`Applying setting: ${key} = ${value}`);
             switch (key) {
                 case 'particlesEnabled': particleManager.toggle(value); break;
                 case 'itemsPerPage': if (document.getElementById('poster-container')) { pageLogic.initIndexPage(); } break;
                 case 'globalFontSize': document.documentElement.style.fontSize = `${value}%`; break;
-                case 'autoplayVideos': console.log("Autoplay videos set to:", value); break; // Lógica se aplicaría en player
+                case 'autoplayVideos': console.log("Autoplay videos set to:", value); break;
                 case 'highContrastMode': body.classList.toggle('high-contrast', value); console.log("High contrast mode:", value); break;
-                case 'emailNotifications': console.log("Email notifications set to:", value); break; // Simulado
-                case 'pushNotifications': console.log("Push notifications set to:", value); break; // Simulado
-                case 'showOnlineStatus': console.log("Show online status set to:", value); break; // Simulado, afectaría UI de chat
-                case 'textToSpeechEnabled': console.log("Text-to-speech set to:", value); break; // Simulado
+                case 'emailNotifications': console.log("Email notifications set to:", value); break;
+                case 'pushNotifications': console.log("Push notifications set to:", value); break;
+                case 'showOnlineStatus': console.log("Show online status set to:", value); break;
+                case 'textToSpeechEnabled': console.log("Text-to-speech set to:", value); break;
+                case 'videoQualityDefault': console.log("Video quality default set to:", value); break;
+                case 'subtitleLanguage': console.log("Subtitle language set to:", value); break;
+                case 'downloadOverWifiOnly': console.log("Download over WiFi only set to:", value); break;
+                case 'enableMatureContentFilter': console.log("Mature content filter set to:", value); break;
+                case 'preferredAudioTrack': console.log("Preferred audio track set to:", value); break;
+                case 'playbackSpeed': console.log("Playback speed set to:", value); break;
+                case 'loopVideosByDefault': console.log("Loop videos by default set to:", value); break;
+                case 'showVideoPreviewOnHover': console.log("Show video preview on hover set to:", value); break;
+                case 'enableKeyboardShortcuts': console.log("Enable keyboard shortcuts set to:", value); break;
+                case 'dataSaverMode': console.log("Data saver mode set to:", value); body.classList.toggle('data-saver-mode', value); break;
                 default: break;
             }
         }
+
         function updateSettingsUI() {
             console.log("Updating settings UI from:", userSettings);
             document.querySelectorAll('[data-setting]').forEach(input => {
-                const key = input.dataset.setting; if (userSettings.hasOwnProperty(key)) {
+                const key = input.dataset.setting;
+                if (userSettings.hasOwnProperty(key)) {
                     if (input.type === 'checkbox') { input.checked = userSettings[key]; }
-                    else if (input.type === 'range' || input.tagName === 'SELECT') { input.value = userSettings[key]; }
+                    else if (input.type === 'range' || input.tagName === 'SELECT' || input.type === 'text') { input.value = userSettings[key]; }
+                } else {
+                    if (input.type === 'checkbox') { userSettings[key] = input.checked; }
+                    else { userSettings[key] = input.value; }
                 }
             });
         }
+
         function init() {
             loadSettings();
             document.querySelectorAll('[data-setting]').forEach(input => {
                 input.addEventListener('change', (event) => { const key = event.target.dataset.setting; const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value; saveSetting(key, value); });
-                 if (input.type === 'range') { input.addEventListener('input', (event) => { const key = event.target.dataset.setting; const value = event.target.value; if (key === 'globalFontSize') { document.documentElement.style.fontSize = `${value}%`; } }); }
+                if (input.type === 'range') { input.addEventListener('input', (event) => { const key = event.target.dataset.setting; const value = event.target.value; if (key === 'globalFontSize') { document.documentElement.style.fontSize = `${value}%`; } }); }
             });
             const clearSearchHistoryBtn = $('#clear-search-history-btn');
             if(clearSearchHistoryBtn) {
@@ -422,18 +676,18 @@ function initializeAppLogic() {
         return { init, saveSetting, getUserSetting: (key) => userSettings[key] };
     })();
 
-    // --- 15. Inicialización General de Módulos y Lógica de Intro (MODIFICADA) ---
+    // --- 15. Inicialización General de Módulos y Lógica de Intro (SIN INTRO) ---
     function startAppModules() {
         console.log("[START] Starting App Modules...");
         themeManager.init();
-        languageManager.init(); // Prepara listeners y estado inicial de currentLang
+        languageManager.init();
         particleManager.init();
         uiManager.init();
-        settingsManager.init(); // Carga y aplica ajustes guardados (puede afectar itemsPerPage)
-        authManager.init();   // Inicia escucha de Auth (esto llamará a setLanguage y otras UI updates)
-        pageLogic.init();     // Lógica de página después de que todo lo demás esté listo
+        settingsManager.init();
+        authManager.init();
+        pageLogic.init();
+        scrollHandler.init();
 
-        // --- Lógica de Animación de Intro (ELIMINADA/NEUTRALIZADA) ---
         console.log("[INTRO] Skipping intro animation logic.");
         if (introAnimation) {
             introAnimation.style.display = 'none';
@@ -449,8 +703,6 @@ function initializeAppLogic() {
         } else {
             console.error("[INTRO] CRITICAL: mainContent element not found! Page content will not be visible.");
         }
-        // --- Fin Lógica de Intro ---
-
         console.log("[START] App Modules Initialized.");
     }
 
