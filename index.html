@@ -9,7 +9,6 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         /* Estilos adicionales específicos para esta página si son necesarios */
-        /* Para posters cuadrados, se modificará .poster en style.css o aquí si es muy específico */
         .poster {
             aspect-ratio: 1 / 1; /* Hace el poster cuadrado */
         }
@@ -22,7 +21,7 @@
         .settings-section .form-group {
             margin-bottom: 15px;
         }
-        .settings-section .form-group label {
+        .settings-section .form-group label:not(.checkbox-label):not(.switch) { /* No aplicar a labels de toggles */
             display: block;
             margin-bottom: 5px;
             color: var(--text-color-secondary);
@@ -30,8 +29,7 @@
         }
         .settings-section .form-group input[type="range"],
         .settings-section .form-group select,
-        .settings-section .form-group input[type="text"],
-        .settings-section .form-group input[type="checkbox"] {
+        .settings-section .form-group input[type="text"] { /* Quitar checkbox de aquí */
             width: 100%;
             padding: 8px;
             background-color: var(--medium-grey);
@@ -39,18 +37,36 @@
             color: var(--text-color);
             border-radius: var(--border-radius-small);
         }
-        .settings-section .form-group input[type="checkbox"] {
-            width: auto; /* Ajustar para checkbox */
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        .settings-section .checkbox-label {
+         /* Estilos para el toggle switch (ya deberían estar en style.css global, pero por si acaso) */
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--medium-grey); transition: .4s; border: 1px solid var(--light-grey); }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 3px; background-color: white; transition: .4s; }
+        input:checked + .slider { background-color: var(--primary-color); border-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
+
+        .settings-section .checkbox-label { /* Para el texto al lado del toggle */
             vertical-align: middle;
             font-size: 0.95em;
+            margin-left: 8px; /* Espacio después del toggle */
+            color: var(--text-color);
+        }
+        .settings-section .form-group div { /* Para alinear el toggle y su label */
+            display: flex;
+            align-items: center;
         }
     </style>
 </head>
 <body>
+
+    <div id="intro-animation" style="display: none;">
+        <div class="intro-logo-container">
+            <span class="intro-x">X</span><span class="intro-text">Pornitoo</span>
+        </div>
+    </div>
+
     <header>
         <div class="header-container">
             <a href="index.html" id="header-logo" class="logo">Pornitoo</a>
@@ -76,7 +92,7 @@
     <div id="settings-panel" class="settings-panel">
         <button id="close-settings-button" class="close-panel-button">×</button>
         <h4 data-translate-key="settings_title">Ajustes</h4>
-        
+
         <div class="settings-section">
             <h5 data-translate-key="settings_theme_title">Tema de Color</h5>
             <div class="theme-swatches">
@@ -98,18 +114,20 @@
         <div class="settings-section">
             <h5 data-translate-key="settings_display_options">Opciones de Visualización</h5>
             <div class="form-group">
-                <label for="particle-toggle" class="checkbox-label" data-translate-key="settings_particles">Efecto Partículas</label>
-                <label class="switch">
-                    <input type="checkbox" id="particle-toggle" data-setting="particlesEnabled" checked>
-                    <span class="slider round"></span>
-                </label>
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="particle-toggle" data-setting="particlesEnabled" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="particle-toggle" class="checkbox-label" data-translate-key="settings_particles">Efecto Partículas</label>
+                </div>
             </div>
             <div class="form-group">
                 <label for="items-per-page" data-translate-key="settings_items_per_page">Elementos por página:</label>
                 <select id="items-per-page" data-setting="itemsPerPage">
-                    <option value="20">20</option>
-                    <option value="40" selected>40</option>
-                    <option value="60">60</option>
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option> <option value="30">30</option>
+                    <option value="40">40</option>
                 </select>
             </div>
             <div class="form-group">
@@ -117,63 +135,155 @@
                 <input type="range" id="font-size-slider" data-setting="globalFontSize" min="80" max="120" value="100" step="5">
             </div>
              <div class="form-group">
-                <label for="autoplay-videos" class="checkbox-label" data-translate-key="settings_autoplay">Autoplay Videos en Detalle</label>
-                <label class="switch">
-                    <input type="checkbox" id="autoplay-videos" data-setting="autoplayVideos">
-                    <span class="slider round"></span>
-                </label>
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoplay-videos" data-setting="autoplayVideos">
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="autoplay-videos" class="checkbox-label" data-translate-key="settings_autoplay">Autoplay Videos en Detalle</label>
+                </div>
+            </div>
+             <div class="form-group">
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="show-video-preview-on-hover" data-setting="showVideoPreviewOnHover" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="show-video-preview-on-hover" class="checkbox-label" data-translate-key="settings_show_preview_hover">Mostrar Preview al Pasar el Ratón (Simulado)</label>
+                </div>
             </div>
         </div>
 
         <div class="settings-section">
-            <h5 data-translate-key="settings_notifications">Notificaciones (Simulado)</h5>
+            <h5 data-translate-key="settings_playback">Reproducción (Simulado)</h5>
             <div class="form-group">
-                <label for="email-notifications" class="checkbox-label" data-translate-key="settings_email_notif">Notificaciones por Email</label>
-                <label class="switch">
-                    <input type="checkbox" id="email-notifications" data-setting="emailNotifications" checked>
-                    <span class="slider round"></span>
-                </label>
+                <label for="video-quality-default" data-translate-key="settings_video_quality">Calidad de Video Predeterminada:</label>
+                <select id="video-quality-default" data-setting="videoQualityDefault">
+                    <option value="auto">Automático</option>
+                    <option value="1080p">1080p</option>
+                    <option value="720p">720p</option>
+                    <option value="480p">480p</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="push-notifications" class="checkbox-label" data-translate-key="settings_push_notif">Notificaciones Push</label>
-                <label class="switch">
-                    <input type="checkbox" id="push-notifications" data-setting="pushNotifications">
-                    <span class="slider round"></span>
-                </label>
+                <label for="playback-speed" data-translate-key="settings_playback_speed">Velocidad de Reproducción:</label>
+                <select id="playback-speed" data-setting="playbackSpeed">
+                    <option value="0.5">0.5x</option>
+                    <option value="1.0" selected>1.0x (Normal)</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2.0">2.0x</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="loop-videos-by-default" data-setting="loopVideosByDefault">
+                        <span class="slider round"></span>
+                    </label>
+                     <label for="loop-videos-by-default" class="checkbox-label" data-translate-key="settings_loop_videos">Repetir Videos por Defecto</label>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="settings-section">
+            <h5 data-translate-key="settings_notifications">Notificaciones (Simulado)</h5>
+            <div class="form-group">
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="email-notifications" data-setting="emailNotifications" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="email-notifications" class="checkbox-label" data-translate-key="settings_email_notif">Notificaciones por Email</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="push-notifications" data-setting="pushNotifications">
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="push-notifications" class="checkbox-label" data-translate-key="settings_push_notif">Notificaciones Push</label>
+                </div>
             </div>
         </div>
 
         <div class="settings-section">
             <h5 data-translate-key="settings_privacy">Privacidad (Simulado)</h5>
             <div class="form-group">
-                <label for="show-online-status" class="checkbox-label" data-translate-key="settings_show_online">Mostrar Estado Online</label>
-                <label class="switch">
-                    <input type="checkbox" id="show-online-status" data-setting="showOnlineStatus" checked>
-                    <span class="slider round"></span>
-                </label>
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="show-online-status" data-setting="showOnlineStatus" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="show-online-status" class="checkbox-label" data-translate-key="settings_show_online">Mostrar Estado Online</label>
+                </div>
             </div>
              <div class="form-group">
-                <label for="search-history" class="checkbox-label" data-translate-key="settings_clear_search">Limpiar Historial de Búsqueda</label>
+                <label for="search-history" data-translate-key="settings_clear_search">Historial de Búsqueda</label>
                 <button id="clear-search-history-btn" class="button-secondary small" data-translate-key="settings_clear_button">Limpiar</button>
+            </div>
+             <div class="form-group">
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-mature-content-filter" data-setting="enableMatureContentFilter">
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="enable-mature-content-filter" class="checkbox-label" data-translate-key="settings_mature_filter">Filtro Contenido Adulto</label>
+                </div>
             </div>
         </div>
          <div class="settings-section">
             <h5 data-translate-key="settings_accessibility">Accesibilidad (Simulado)</h5>
             <div class="form-group">
-                <label for="high-contrast-mode" class="checkbox-label" data-translate-key="settings_high_contrast">Modo Alto Contraste</label>
-                <label class="switch">
-                    <input type="checkbox" id="high-contrast-mode" data-setting="highContrastMode">
-                    <span class="slider round"></span>
-                </label>
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="high-contrast-mode" data-setting="highContrastMode">
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="high-contrast-mode" class="checkbox-label" data-translate-key="settings_high_contrast">Modo Alto Contraste</label>
+                </div>
             </div>
             <div class="form-group">
-                <label for="text-to-speech" class="checkbox-label" data-translate-key="settings_tts">Habilitar Texto a Voz</label>
-                <label class="switch">
-                    <input type="checkbox" id="text-to-speech" data-setting="textToSpeechEnabled">
-                    <span class="slider round"></span>
-                </label>
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="text-to-speech" data-setting="textToSpeechEnabled">
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="text-to-speech" class="checkbox-label" data-translate-key="settings_tts">Habilitar Texto a Voz</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="subtitle-language" data-translate-key="settings_subtitle_lang">Idioma de Subtítulos:</label>
+                <select id="subtitle-language" data-setting="subtitleLanguage">
+                    <option value="es">Español</option>
+                    <option value="en">English</option>
+                    <option value="off">Desactivados</option>
+                </select>
             </div>
         </div>
+         <div class="settings-section">
+            <h5 data-translate-key="settings_data_usage">Uso de Datos (Simulado)</h5>
+            <div class="form-group">
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="download-over-wifi-only" data-setting="downloadOverWifiOnly" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="download-over-wifi-only" class="checkbox-label" data-translate-key="settings_download_wifi">Descargar solo con Wi-Fi</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="data-saver-mode" data-setting="dataSaverMode">
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="data-saver-mode" class="checkbox-label" data-translate-key="settings_data_saver">Modo Ahorro de Datos</label>
+                </div>
+            </div>
+        </div>
+
 
         <p style="opacity: 0.6; margin-top: 20px; text-align:center;" data-translate-key="settings_more_soon">(Más ajustes próximamente...)</p>
     </div>
