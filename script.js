@@ -155,12 +155,10 @@ function initializeAppLogic() {
     const scrollHandler = (() => {
         function handleScroll() {
             const scrollY = window.scrollY;
-            // Back to top button logic
             if (backToTopButton) {
                 if (scrollY > 300) { backToTopButton.style.display = 'block'; }
                 else { backToTopButton.style.display = 'none'; }
             }
-            // Header visibility logic (add a header class if needed)
             const header = document.querySelector('header');
             if (header) {
                 if (scrollY > 100) { header.classList.add('scrolled'); }
