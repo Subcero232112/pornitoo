@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeAppLogic() {
     console.log("[MAIN] Initializing App Logic...");
 
-    // --- Funciones Utilitarias (MOVIDAS AL PRINCIPIO) ---
+    // --- Funciones Utilitarias ---
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => document.querySelectorAll(selector);
     const saveToLocalStorage = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.error("LocalStorage save error:", e); } };
@@ -32,7 +32,7 @@ function initializeAppLogic() {
     function hideLoginError() { if (loginErrorMessage) { loginErrorMessage.textContent = ''; loginErrorMessage.style.display = 'none'; } }
     function escapeHTML(str) { const div = document.createElement('div'); div.appendChild(document.createTextNode(str || '')); return div.innerHTML; }
     function formatViews(views) { if (views === undefined || views === null) return '---'; if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M'; if (views >= 1000) return (views / 1000).toFixed(1) + 'K'; return views.toString(); }
-    function formatDate(timestamp) { if (!timestamp) return '---'; try { const date = new Date(timestamp); return date.toLocaleDateString(currentLang + '-' + currentLang.toUpperCase(), { year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) { console.error("Error formatting date:", e); return 'Fecha inválida'; } }
+    function formatDate(timestamp) { if (!timestamp) return '---'; try { const date = new Date(timestamp); const langForDate = currentLang || 'es'; return date.toLocaleDateString(langForDate + '-' + langForDate.toUpperCase(), { year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) { console.error("Error formatting date:", e); return 'Fecha inválida'; } }
     function showStatusMessage(element, message, type = 'info', autoHideDelay = 0) { if (!element) return; element.textContent = message; element.className = 'admin-status'; element.classList.add(type); element.style.display = 'block'; if (autoHideDelay > 0) setTimeout(() => { if(element) element.style.display = 'none'; }, autoHideDelay); }
 
 
@@ -48,44 +48,35 @@ function initializeAppLogic() {
     const ADMIN_EMAILS = ["santosramonsteven@gmail.com", "evilgado6@gmail.com"];
 
     // --- 1. Selectores Globales ---
-    console.log("[SELECTORS] Getting global elements...");
     const body = document.body; const root = document.documentElement;
     const headerLogo = $('#header-logo'); const mainContent = $('#main-content');
-    const introAnimation = $('#intro-animation'); // Todavía lo seleccionamos para ocultarlo
+    const introAnimation = $('#intro-animation');
     const userAuthButton = $('#user-auth-button');
-    console.log("[SELECTORS] mainContent:", mainContent);
-    console.log("[SELECTORS] introAnimation:", introAnimation);
-
     const userPhotoElement = document.createElement('img'); userPhotoElement.alt = 'User'; userPhotoElement.style.display = 'none';
     if (userAuthButton) userAuthButton.appendChild(userPhotoElement);
     const userIconElement = userAuthButton?.querySelector('i.fa-user');
-    // Login Modal
     const loginModal = $('#login-modal'); const loginEmailInput = $('#login-email');
     const loginPasswordInput = $('#login-password'); const signUpButton = $('#signup-button');
     const signInButton = $('#signin-button'); const googleSignInButton = $('#google-signin-button');
     const loginErrorMessage = $('#login-error-message');
-    // Settings Panel
     const settingsPanel = $('#settings-panel'); const settingsButton = $('#settings-button');
     const closeSettingsButton = $('#close-settings-button');
-    // Admin FAB
     const adminFab = $('#admin-fab');
-    // User Request Video
     const requestVideoButton = $('#request-video-button');
     const requestVideoModal = $('#request-video-modal'); const closeRequestVideoModal = $('#close-request-video-modal');
     const requestVideoForm = $('#request-video-form'); const requestTitleInput = $('#request-title');
     const requestUrlInput = $('#request-url'); const requestReasonInput = $('#request-reason');
     const submitRequestButton = $('#submit-request-button'); const requestVideoStatus = $('#request-video-status');
-    // Sidebar Chat (para updateAuthButtonUI)
     const sidebarUserPhoto = $('#sidebar-user-photo'); const sidebarUserName = $('#sidebar-user-name');
 
     // --- 2. Estado ---
     let currentLang = 'es'; let particlesActive = true; let currentUser = null; let isAdmin = false;
-    let userSettings = {};
+    let userSettings = {}; // Para guardar las nuevas configuraciones
 
     // --- 3. Translations ---
     const translations = {
-        es: { index_page_title: "Inicio - Pornitoo", search_placeholder: "Buscar títulos...", search_button: "Buscar", login_tooltip: "Iniciar sesión", chat_tooltip: "Ir al Chat", settings_tooltip: "Configuración", popular_title: "Populares Ahora", loading: "Cargando...", settings_title: "Ajustes", settings_theme_title: "Tema de Color", settings_language_title: "Idioma", lang_es: "Español", lang_en: "English", settings_display_options: "Opciones de Visualización", settings_particles: "Efecto Partículas", settings_items_per_page: "Elementos por página:", settings_font_size: "Tamaño de Fuente Global:", settings_autoplay: "Autoplay Videos en Detalle", settings_notifications: "Notificaciones (Simulado)", settings_email_notif: "Notificaciones por Email", settings_push_notif: "Notificaciones Push", settings_privacy: "Privacidad (Simulado)", settings_show_online: "Mostrar Estado Online", settings_clear_search: "Limpiar Historial de Búsqueda", settings_clear_button: "Limpiar", settings_accessibility: "Accesibilidad (Simulado)", settings_high_contrast: "Modo Alto Contraste", settings_tts: "Habilitar Texto a Voz", settings_more_soon: "(Más ajustes próximamente...)", login_modal_title: "Iniciar Sesión / Registro", login_email_label: "Correo Electrónico", login_password_label: "Contraseña", login_signup_button: "Registrarse", login_signin_button: "Iniciar Sesión", login_divider_or: "O", login_google_firebase: "Continuar con Google", login_modal_text_firebase: "Regístrate o inicia sesión para acceder a todas las funciones.", back_button: "Volver", views_count: "Vistas", published_date: "Publicado:", related_videos_title: "Más Videos", description_title: "Descripción", comments_title: "Comentarios", logout_tooltip: "Cerrar sesión", chat_page_title: "Chat General", chat_loading: "Cargando mensajes...", chat_input_placeholder: "Escribe un mensaje...", no_related_videos: "No hay videos relacionados.", login_needed_for_chat: "Inicia sesión para chatear", login_needed_to_comment: "Inicia sesión para comentar", comment_placeholder: "Escribe tu comentario...", comment_send_button: "Enviar", suggest_video: "Sugerir Video", suggest_video_title: "Sugerir un Video", request_title_label: "Título del Video:", request_url_label: "URL del Video (Opcional):", request_url_placeholder: "Enlace a YouTube, Vimeo, Drive, etc.", request_reason_label: "Descripción o Razón:", request_reason_placeholder: "¿Por qué deberíamos añadir este video?", submit_suggestion_button: "Enviar Sugerencia", request_sent_success: "Sugerencia enviada. ¡Gracias!", login_needed_to_suggest: "Inicia sesión para sugerir videos", "auth/invalid-email": "Correo no válido.", "auth/user-disabled": "Cuenta deshabilitada.", "auth/email-already-in-use": "Correo ya registrado.", "auth/weak-password": "Contraseña >6 caracteres.", "auth/operation-not-allowed": "Login por correo no habilitado.", "auth/invalid-credential": "Credenciales inválidas.", "auth/missing-password": "Falta contraseña.", "auth/network-request-failed": "Error de red.", "auth/too-many-requests": "Demasiados intentos. Intenta más tarde.", "auth/popup-closed-by-user": "Login cancelado.", "error_default": "Error inesperado." },
-        en: { index_page_title: "Home - Pornitoo", search_placeholder: "Search titles...", search_button: "Search", login_tooltip: "Login", chat_tooltip: "Go to Chat", settings_tooltip: "Settings", popular_title: "Popular Now", loading: "Loading...", settings_title: "Settings", settings_theme_title: "Color Theme", settings_language_title: "Language", lang_es: "Spanish", lang_en: "English", settings_display_options: "Display Options", settings_particles: "Particle Effect", settings_items_per_page: "Items per page:", settings_font_size: "Global Font Size:", settings_autoplay: "Autoplay Videos in Detail", settings_notifications: "Notifications (Simulated)", settings_email_notif: "Email Notifications", settings_push_notif: "Push Notifications", settings_privacy: "Privacy (Simulated)", settings_show_online: "Show Online Status", settings_clear_search: "Clear Search History", settings_clear_button: "Clear", settings_accessibility: "Accessibility (Simulated)", settings_high_contrast: "High Contrast Mode", settings_tts: "Enable Text-to-Speech", settings_more_soon: "(More settings coming soon...)", login_modal_title: "Login / Sign Up", login_email_label: "Email Address", login_password_label: "Password", login_signup_button: "Sign Up", login_signin_button: "Sign In", login_divider_or: "OR", login_google_firebase: "Continue with Google", login_modal_text_firebase: "Sign up or log in to access all features.", back_button: "Back", views_count: "Views", published_date: "Published:", related_videos_title: "More Videos", description_title: "Description", comments_title: "Comments", logout_tooltip: "Sign out", chat_page_title: "General Chat", chat_loading: "Loading messages...", chat_input_placeholder: "Type a message...", no_related_videos: "No related videos found.", login_needed_for_chat: "Log in to chat", login_needed_to_comment: "Log in to comment", comment_placeholder: "Write your comment...", comment_send_button: "Send", suggest_video: "Suggest Video", suggest_video_title: "Suggest a Video", request_title_label: "Video Title:", request_url_label: "Video URL (Optional):", request_url_placeholder: "Link to YouTube, Vimeo, Drive, etc.", request_reason_label: "Description or Reason:", request_reason_placeholder: "Why should we add this video?", submit_suggestion_button: "Send Suggestion", request_sent_success: "Suggestion sent. Thank you!", login_needed_to_suggest: "Log in to suggest videos", "auth/invalid-email": "Invalid email.", "auth/user-disabled": "Account disabled.", "auth/email-already-in-use": "Email already registered.", "auth/weak-password": "Password >6 chars.", "auth/operation-not-allowed": "Email login not enabled.", "auth/invalid-credential": "Invalid credentials.", "auth/missing-password": "Password missing.", "auth/network-request-failed": "Network error.", "auth/too-many-requests": "Too many attempts. Try later.", "auth/popup-closed-by-user": "Login canceled.", "error_default": "Unexpected error." }
+        es: { index_page_title: "Inicio - Pornitoo", search_placeholder: "Buscar títulos...", search_button: "Buscar", login_tooltip: "Iniciar sesión", chat_tooltip: "Ir al Chat", settings_tooltip: "Configuración", popular_title: "Populares Ahora", loading: "Cargando...", settings_title: "Ajustes", settings_theme_title: "Tema de Color", settings_language_title: "Idioma", lang_es: "Español", lang_en: "English", settings_display_options: "Opciones de Visualización", settings_particles: "Efecto Partículas", settings_items_per_page: "Elementos por página:", settings_font_size: "Tamaño de Fuente Global:", settings_autoplay: "Autoplay Videos en Detalle", settings_notifications: "Notificaciones", settings_email_notif: "Notificaciones por Email", settings_push_notif: "Notificaciones Push", settings_privacy: "Privacidad", settings_show_online: "Mostrar Estado Online", settings_clear_search: "Limpiar Historial de Búsqueda", settings_clear_button: "Limpiar", settings_accessibility: "Accesibilidad", settings_high_contrast: "Modo Alto Contraste", settings_tts: "Habilitar Texto a Voz", settings_more_soon: "(Más ajustes próximamente...)", login_modal_title: "Iniciar Sesión / Registro", login_email_label: "Correo Electrónico", login_password_label: "Contraseña", login_signup_button: "Registrarse", login_signin_button: "Iniciar Sesión", login_divider_or: "O", login_google_firebase: "Continuar con Google", login_modal_text_firebase: "Regístrate o inicia sesión para acceder a todas las funciones.", back_button: "Volver", views_count: "Vistas", published_date: "Publicado:", related_videos_title: "Más Videos", description_title: "Descripción", comments_title: "Comentarios", logout_tooltip: "Cerrar sesión", chat_page_title: "Chat General", chat_loading: "Cargando mensajes...", chat_input_placeholder: "Escribe un mensaje...", no_related_videos: "No hay videos relacionados.", login_needed_for_chat: "Inicia sesión para chatear", login_needed_to_comment: "Inicia sesión para comentar", comment_placeholder: "Escribe tu comentario...", comment_send_button: "Enviar", suggest_video: "Sugerir Video", suggest_video_title: "Sugerir un Video", request_title_label: "Título del Video:", request_url_label: "URL del Video (Opcional):", request_url_placeholder: "Enlace a YouTube, Vimeo, Drive, etc.", request_reason_label: "Descripción o Razón:", request_reason_placeholder: "¿Por qué deberíamos añadir este video?", submit_suggestion_button: "Enviar Sugerencia", request_sent_success: "Sugerencia enviada. ¡Gracias!", login_needed_to_suggest: "Inicia sesión para sugerir videos", "auth/invalid-email": "Correo no válido.", "auth/user-disabled": "Cuenta deshabilitada.", "auth/email-already-in-use": "Correo ya registrado.", "auth/weak-password": "Contraseña >6 caracteres.", "auth/operation-not-allowed": "Login por correo no habilitado.", "auth/invalid-credential": "Credenciales inválidas.", "auth/missing-password": "Falta contraseña.", "auth/network-request-failed": "Error de red.", "auth/too-many-requests": "Demasiados intentos. Intenta más tarde.", "auth/popup-closed-by-user": "Login cancelado.", "error_default": "Error inesperado.", confirm_clear_search_history: "¿Seguro que quieres limpiar el historial de búsqueda? (Simulado)", search_history_cleared: "Historial de búsqueda limpiado (Simulado)." },
+        en: { index_page_title: "Home - Pornitoo", search_placeholder: "Search titles...", search_button: "Search", login_tooltip: "Login", chat_tooltip: "Go to Chat", settings_tooltip: "Settings", popular_title: "Popular Now", loading: "Loading...", settings_title: "Settings", settings_theme_title: "Color Theme", settings_language_title: "Language", lang_es: "Spanish", lang_en: "English", settings_display_options: "Display Options", settings_particles: "Particle Effect", settings_items_per_page: "Items per page:", settings_font_size: "Global Font Size:", settings_autoplay: "Autoplay Videos in Detail", settings_notifications: "Notifications", settings_email_notif: "Email Notifications", settings_push_notif: "Push Notifications", settings_privacy: "Privacy", settings_show_online: "Show Online Status", settings_clear_search: "Clear Search History", settings_clear_button: "Clear", settings_accessibility: "Accessibility", settings_high_contrast: "High Contrast Mode", settings_tts: "Enable Text-to-Speech", settings_more_soon: "(More settings coming soon...)", login_modal_title: "Login / Sign Up", login_email_label: "Email Address", login_password_label: "Password", login_signup_button: "Sign Up", login_signin_button: "Sign In", login_divider_or: "OR", login_google_firebase: "Continue with Google", login_modal_text_firebase: "Sign up or log in to access all features.", back_button: "Back", views_count: "Views", published_date: "Published:", related_videos_title: "More Videos", description_title: "Description", comments_title: "Comments", logout_tooltip: "Sign out", chat_page_title: "General Chat", chat_loading: "Loading messages...", chat_input_placeholder: "Type a message...", no_related_videos: "No related videos found.", login_needed_for_chat: "Log in to chat", login_needed_to_comment: "Log in to comment", comment_placeholder: "Write your comment...", comment_send_button: "Send", suggest_video: "Suggest Video", suggest_video_title: "Suggest a Video", request_title_label: "Video Title:", request_url_label: "Video URL (Optional):", request_url_placeholder: "Link to YouTube, Vimeo, Drive, etc.", request_reason_label: "Description or Reason:", request_reason_placeholder: "Why should we add this video?", submit_suggestion_button: "Send Suggestion", request_sent_success: "Suggestion sent. Thank you!", login_needed_to_suggest: "Log in to suggest videos", "auth/invalid-email": "Invalid email.", "auth/user-disabled": "Account disabled.", "auth/email-already-in-use": "Email already registered.", "auth/weak-password": "Password >6 chars.", "auth/operation-not-allowed": "Email login not enabled.", "auth/invalid-credential": "Invalid credentials.", "auth/missing-password": "Password missing.", "auth/network-request-failed": "Network error.", "auth/too-many-requests": "Too many attempts. Try later.", "auth/popup-closed-by-user": "Login canceled.", "error_default": "Unexpected error.", confirm_clear_search_history: "Are you sure you want to clear search history? (Simulated)", search_history_cleared: "Search history cleared! (Simulated)." }
     };
 
     // --- 5. Gestor de Temas ---
@@ -98,7 +89,7 @@ function initializeAppLogic() {
         return { init, applyTheme };
     })();
 
-    // --- 6. Gestor de Idioma ---
+    // --- 6. Gestor de Idioma (REVISADO) ---
     const languageManager = (() => {
         const langButtons = $$('.language-button');
         function setLanguage(lang) {
@@ -113,11 +104,19 @@ function initializeAppLogic() {
                     else { el.textContent = translation; }
                 }
             });
-            updateAuthButtonUI(currentUser); langButtons.forEach(button => { button.classList.toggle('active', button.dataset.lang === lang); });
+            updateAuthButtonUI(currentUser); // Asegurar que el tooltip del botón de auth se actualice
+            langButtons.forEach(button => { button.classList.toggle('active', button.dataset.lang === lang); });
             saveToLocalStorage('selectedLangPornitoo', lang);
         }
         function getCurrentLang() { return currentLang; }
-        function init() { langButtons.forEach(button => { button.addEventListener('click', (e) => { const newLang = e.target.dataset.lang; if (newLang) setLanguage(newLang); }); }); const savedLang = loadFromLocalStorage('selectedLangPornitoo', 'es'); currentLang = savedLang; window.currentLang = currentLang; }
+        function init() {
+            const savedLang = loadFromLocalStorage('selectedLangPornitoo', 'es');
+            currentLang = savedLang; // Establecer estado inicial
+            window.currentLang = currentLang;
+            // La primera llamada a setLanguage se hará después de que auth esté listo (en onAuthStateChanged)
+            // para asegurar que todos los elementos (incluyendo el botón de auth) se traduzcan correctamente.
+            langButtons.forEach(button => { button.addEventListener('click', (e) => { const newLang = e.target.dataset.lang; if (newLang) setLanguage(newLang); }); });
+        }
         return { init, setLanguage, getCurrentLang };
     })();
 
@@ -126,7 +125,7 @@ function initializeAppLogic() {
         const container = $('#particles'); const toggle = $('#particle-toggle'); let isActive = true;
         function createParticles(count = 50) { if (!container || !root) return; container.innerHTML = ''; const currentPrimaryColor = getComputedStyle(root).getPropertyValue('--primary-color').trim(); if (!currentPrimaryColor) { console.warn("Could not get primary color for particles."); return; } for (let i = 0; i < count; i++) { const particle = document.createElement('div'); particle.classList.add('particle'); particle.style.backgroundColor = currentPrimaryColor; const size = Math.random() * 3 + 1; particle.style.width = `${size}px`; particle.style.height = `${size}px`; const xStart = Math.random() * 100; particle.style.left = `${xStart}vw`; particle.style.setProperty('--x-start', `${xStart}vw`); particle.style.setProperty('--x-end', `${xStart + (Math.random() * 40 - 20)}vw`); const duration = Math.random() * 20 + 15; particle.style.animationDuration = `${duration}s`; particle.style.animationDelay = `-${Math.random() * duration}s`; container.appendChild(particle); } container.classList.toggle('active', isActive); }
         function toggleParticles(forceState) { isActive = forceState !== undefined ? forceState : !isActive; if(container) container.classList.toggle('active', isActive); if(toggle) toggle.checked = isActive; saveToLocalStorage('particlesActivePornitoo', isActive); }
-        function init() { isActive = loadFromLocalStorage('particlesActivePornitoo', 'true') === 'true'; if (toggle) { toggle.checked = isActive; toggle.addEventListener('change', () => toggleParticles(toggle.checked)); } if (container && isActive) { setTimeout(createParticles, 100); } else if (container) { container.classList.remove('active'); } }
+        function init() { isActive = loadFromLocalStorage('particlesActivePornitoo', true) === true; if (toggle) { toggle.checked = isActive; toggle.addEventListener('change', () => toggleParticles(toggle.checked)); } if (container && isActive) { setTimeout(createParticles, 100); } else if (container) { container.classList.remove('active'); } }
         return { init, toggle: toggleParticles, create: createParticles };
     })();
 
@@ -157,9 +156,10 @@ function initializeAppLogic() {
             onAuthStateChanged(auth, (user) => {
                  console.log("Main Script Auth State Changed:", user ? `User Logged In (${user.uid})` : "User Logged Out");
                  const wasLoggedIn = !!currentUser; currentUser = user; isAdmin = checkAdminStatus(user);
-                 updateAuthButtonUI(user);
+                 updateAuthButtonUI(user); // Actualiza el botón de auth y sidebar
                  if (adminFab) adminFab.style.display = isAdmin ? 'flex' : 'none';
                  if (requestVideoButton) requestVideoButton.style.display = (user && !isAdmin) ? 'flex' : 'none';
+                 // Setear el idioma al cambiar estado de auth o al cargar si no había usuario
                  if (!wasLoggedIn || !user) { languageManager.setLanguage(languageManager.getCurrentLang()); }
                  if (document.getElementById('detail-view-container')) { const detailVideoId = new URLSearchParams(window.location.search).get('id'); if (detailVideoId) setupCommentForm(detailVideoId); }
                  setupRequestForm();
@@ -176,17 +176,25 @@ function initializeAppLogic() {
     function updateAuthButtonUI(user) {
          const userAuthBtn = $('#user-auth-button'); const userPhoto = userAuthBtn?.querySelector('img'); const userIcon = userAuthBtn?.querySelector('i.fa-user');
          const sidebarPhoto = $('#sidebar-user-photo'); const sidebarName = $('#sidebar-user-name');
-         if (!userAuthBtn || !userPhoto || !userIcon) { /*console.warn("Header auth elements not found");*/ }
-         const currentLang = languageManager.getCurrentLang ? languageManager.getCurrentLang() : 'es';
+         if (!userAuthBtn || !userPhoto || !userIcon) { console.warn("Header auth elements not found for UI update."); }
+         const currentLangForTooltip = languageManager.getCurrentLang ? languageManager.getCurrentLang() : 'es'; // Asegurar que currentLang esté disponible
          if (user) {
-             if(userAuthBtn) userAuthBtn.classList.add('logged-in'); const photoURL = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email || 'U')}&background=random&color=fff&size=40`;
-             if(userPhoto) { userPhoto.src = photoURL; userPhoto.style.display = 'block'; } if(userIcon) userIcon.style.display = 'none';
-             const logoutTooltipText = translations[currentLang]?.logout_tooltip || "Sign out"; if(userAuthBtn) { userAuthBtn.dataset.tooltip = logoutTooltipText; userAuthBtn.setAttribute('title', `${user.displayName || user.email || 'User Profile'} (${logoutTooltipText})`); }
-             if (sidebarPhoto) sidebarPhoto.src = photoURL; if (sidebarName) sidebarName.textContent = user.displayName || user.email?.split('@')[0] || 'Usuario';
+             if(userAuthBtn) userAuthBtn.classList.add('logged-in');
+             const photoURL = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'U')}&background=random&color=fff&size=40`;
+             if(userPhoto) { userPhoto.src = photoURL; userPhoto.style.display = 'block'; }
+             if(userIcon) userIcon.style.display = 'none';
+             const logoutTooltipText = translations[currentLangForTooltip]?.logout_tooltip || "Sign out";
+             if(userAuthBtn) { userAuthBtn.dataset.tooltip = logoutTooltipText; userAuthBtn.setAttribute('title', `${user.displayName || user.email || 'User Profile'} (${logoutTooltipText})`); }
+             if (sidebarPhoto) sidebarPhoto.src = photoURL;
+             if (sidebarName) sidebarName.textContent = user.displayName || user.email?.split('@')[0] || 'Usuario';
          } else {
-             if(userAuthBtn) userAuthBtn.classList.remove('logged-in'); if(userPhoto) userPhoto.style.display = 'none'; if(userIcon) userIcon.style.display = 'block';
-             const loginTooltipText = translations[currentLang]?.login_tooltip || "Login"; if(userAuthBtn) { userAuthBtn.dataset.tooltip = loginTooltipText; userAuthBtn.setAttribute('title', loginTooltipText); }
-             if (sidebarPhoto) sidebarPhoto.src = 'https://via.placeholder.com/40/cccccc/ffffff?text=U'; if (sidebarName) sidebarName.textContent = 'Usuario';
+             if(userAuthBtn) userAuthBtn.classList.remove('logged-in');
+             if(userPhoto) userPhoto.style.display = 'none';
+             if(userIcon) userIcon.style.display = 'block';
+             const loginTooltipText = translations[currentLangForTooltip]?.login_tooltip || "Login";
+             if(userAuthBtn) { userAuthBtn.dataset.tooltip = loginTooltipText; userAuthBtn.setAttribute('title', loginTooltipText); }
+             if (sidebarPhoto) sidebarPhoto.src = 'https://via.placeholder.com/40/cccccc/ffffff?text=U';
+             if (sidebarName) sidebarName.textContent = 'Usuario';
          }
      }
 
@@ -196,17 +204,32 @@ function initializeAppLogic() {
             console.log("[PAGELOGIC] Initializing Index Page - Generating Posters");
             const posterContainer = $('#poster-container'); const loadingIndicator = $('#loading-indicator');
             if (!posterContainer || !loadingIndicator) { console.error("Index page elements missing for posters"); return; }
-            posterContainer.innerHTML = ''; const itemsToDisplay = parseInt(userSettings.itemsPerPage || 40, 10);
+            posterContainer.innerHTML = '';
+            const itemsToDisplay = parseInt(userSettings.itemsPerPage || 20, 10); // CAMBIADO A 20 por defecto
             console.log(`[PAGELOGIC] Displaying ${itemsToDisplay} posters.`);
             for (let i = 1; i <= itemsToDisplay; i++) {
-                const videoId = `sim-${i}`; const themeColorForPlaceholder = (getComputedStyle(root).getPropertyValue('--primary-color').trim() || '#00ff00').substring(1);
-                const videoData = { title: `Video de Prueba ${i}`, posterUrl: `https://via.placeholder.com/300x300/${themeColorForPlaceholder}/000000?text=Video+${i}`};
-                const defaultImgSrc = `https://via.placeholder.com/300x300/cccccc/000?text=N/A`; const errorImgSrc = `https://via.placeholder.com/300x300/ff0000/fff?text=Error`;
-                const posterItem = document.createElement('a'); posterItem.href = `detail.html?id=${videoId}`; posterItem.classList.add('poster-item'); posterItem.dataset.id = videoId;
-                posterItem.innerHTML = ` <div class="poster"> <img src="${videoData.posterUrl || defaultImgSrc}" alt="${videoData.title}" loading="lazy" onerror="this.onerror=null; this.src='${errorImgSrc}';"> </div> <h3 class="poster-title">${escapeHTML(videoData.title)}</h3> `;
+                const videoId = `sim-placeholder-${i}`; // ID único para placeholders
+                const themeColorForPlaceholder = (getComputedStyle(root).getPropertyValue('--primary-color').trim() || '#00ff00').substring(1);
+                // Generar un color de fondo aleatorio para el placeholder de imagen
+                const randomBgColor = Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                const posterUrl = `https://via.placeholder.com/300x300/${randomBgColor}/ffffff?text=+`; // Sin texto explícito
+
+                const errorImgSrc = `https://via.placeholder.com/300x300/ff0000/fff?text=Error`;
+                const posterItem = document.createElement('a');
+                // Los posters de placeholder no necesitan enlazar a detail.html si no tienen datos reales
+                // posterItem.href = `detail.html?id=${videoId}`;
+                posterItem.href = `#placeholder-${videoId}`; // Enlace de placeholder
+                posterItem.classList.add('poster-item', 'placeholder-poster'); // Clase adicional
+                posterItem.dataset.id = videoId;
+                posterItem.innerHTML = `
+                    <div class="poster">
+                        <img src="${posterUrl}" alt="Poster Placeholder" loading="lazy" onerror="this.onerror=null; this.src='${errorImgSrc}';">
+                    </div>
+                    `;
                 posterContainer.appendChild(posterItem);
             }
-            themeManager.applyTheme(loadFromLocalStorage('selectedThemePornitoo', 'green')); loadingIndicator.style.display = 'none';
+            themeManager.applyTheme(loadFromLocalStorage('selectedThemePornitoo', 'green')); // Aplicar tema a placeholders
+            loadingIndicator.style.display = 'none';
         }
 
         function initDetailPage() {
@@ -217,7 +240,22 @@ function initializeAppLogic() {
             const detailDescription = $('#detail-description'); const videoPlayerIframe = $('#video-player-iframe');
             const relatedContainer = $('#related-items-container'); const videoLoadingIndicator = $('#video-loading-indicator');
 
-            if (!itemId) { console.error("No item ID found in URL"); if (detailTitle) detailTitle.textContent = "Error: ID no encontrado"; if (pageTitleElement) pageTitleElement.textContent = "Error - Pornitoo"; return; }
+            if (!itemId || itemId.startsWith('sim-placeholder-')) { // No cargar datos para placeholders
+                 console.warn("Placeholder item clicked or no item ID. Detail page will show defaults.");
+                 if (detailTitle) detailTitle.textContent = "Video de Ejemplo";
+                 if (pageTitleElement) pageTitleElement.textContent = "Detalle Ejemplo - Pornitoo";
+                 if (detailDescription) detailDescription.textContent = "Esta es una descripción de ejemplo para un video placeholder.";
+                 if (videoPlayerIframe) videoPlayerIframe.src = ""; // O un video de ejemplo
+                 if (videoLoadingIndicator) videoLoadingIndicator.style.display = 'none';
+                 if (relatedContainer) relatedContainer.innerHTML = '<p style="opacity:0.7;">(Relacionados no disponibles para placeholders)</p>';
+                 // No cargar comentarios para placeholders
+                 const commentsContainer = $('#comments-container');
+                 if (commentsContainer) commentsContainer.innerHTML = '<p style="opacity:0.7;">Comentarios no disponibles para placeholders.</p>';
+                 const addCommentForm = $('#add-comment-form');
+                 if (addCommentForm) addCommentForm.style.display = 'none';
+                 return;
+            }
+
             console.log(`[PAGELOGIC] Fetching details for video ID: ${itemId}`);
             if(videoLoadingIndicator) videoLoadingIndicator.style.display = 'block'; if(videoPlayerIframe) videoPlayerIframe.style.opacity = '0';
 
@@ -337,7 +375,7 @@ function initializeAppLogic() {
 
     // --- 14. Lógica de Ajustes Avanzados ---
     const settingsManager = (() => {
-        const defaultSettings = { particlesEnabled: true, itemsPerPage: "40", globalFontSize: "100", autoplayVideos: false, emailNotifications: true, pushNotifications: false, showOnlineStatus: true, highContrastMode: false, textToSpeechEnabled: false };
+        const defaultSettings = { particlesEnabled: true, itemsPerPage: "20", globalFontSize: "100", autoplayVideos: false, emailNotifications: true, pushNotifications: false, showOnlineStatus: true, highContrastMode: false, textToSpeechEnabled: false };
         function loadSettings() { userSettings = loadFromLocalStorage('userPornitooSettings', defaultSettings); applySettings(); updateSettingsUI(); }
         function saveSetting(key, value) { userSettings[key] = value; saveToLocalStorage('userPornitooSettings', userSettings); applySetting(key, value); }
         function applySettings() { console.log("Applying all user settings:", userSettings); Object.entries(userSettings).forEach(([key, value]) => { applySetting(key, value); }); }
@@ -347,8 +385,12 @@ function initializeAppLogic() {
                 case 'particlesEnabled': particleManager.toggle(value); break;
                 case 'itemsPerPage': if (document.getElementById('poster-container')) { pageLogic.initIndexPage(); } break;
                 case 'globalFontSize': document.documentElement.style.fontSize = `${value}%`; break;
-                case 'autoplayVideos': console.log("Autoplay videos set to:", value); break;
+                case 'autoplayVideos': console.log("Autoplay videos set to:", value); break; // Lógica se aplicaría en player
                 case 'highContrastMode': body.classList.toggle('high-contrast', value); console.log("High contrast mode:", value); break;
+                case 'emailNotifications': console.log("Email notifications set to:", value); break; // Simulado
+                case 'pushNotifications': console.log("Push notifications set to:", value); break; // Simulado
+                case 'showOnlineStatus': console.log("Show online status set to:", value); break; // Simulado, afectaría UI de chat
+                case 'textToSpeechEnabled': console.log("Text-to-speech set to:", value); break; // Simulado
                 default: break;
             }
         }
@@ -384,25 +426,25 @@ function initializeAppLogic() {
     function startAppModules() {
         console.log("[START] Starting App Modules...");
         themeManager.init();
-        languageManager.init();
+        languageManager.init(); // Prepara listeners y estado inicial de currentLang
         particleManager.init();
         uiManager.init();
-        settingsManager.init();
-        authManager.init();
-        pageLogic.init();
+        settingsManager.init(); // Carga y aplica ajustes guardados (puede afectar itemsPerPage)
+        authManager.init();   // Inicia escucha de Auth (esto llamará a setLanguage y otras UI updates)
+        pageLogic.init();     // Lógica de página después de que todo lo demás esté listo
 
         // --- Lógica de Animación de Intro (ELIMINADA/NEUTRALIZADA) ---
         console.log("[INTRO] Skipping intro animation logic.");
         if (introAnimation) {
-            introAnimation.style.display = 'none'; // Ocultar el contenedor de la intro inmediatamente
+            introAnimation.style.display = 'none';
             console.log("[INTRO] introAnimation element hidden.");
         } else {
             console.warn("[INTRO] introAnimation element not found, cannot hide it.");
         }
 
         if (mainContent) {
-            mainContent.style.opacity = '1'; // Asegurar que el contenido principal sea visible
-            mainContent.style.transition = 'none'; // Evitar cualquier transición de opacidad no deseada
+            mainContent.style.opacity = '1';
+            mainContent.style.transition = 'none';
             console.log("[INTRO] mainContent made visible.");
         } else {
             console.error("[INTRO] CRITICAL: mainContent element not found! Page content will not be visible.");
