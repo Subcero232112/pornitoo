@@ -6,8 +6,7 @@
     <title data-translate-key="index_page_title">Inicio - Pornitoo</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <style>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"> <style>
         /* Estilos mejorados para las carteleras */
         #poster-container {
             display: grid;
@@ -37,7 +36,7 @@
         .movie-poster {
             position: relative;
             aspect-ratio: 2 / 3; /* Proporción de cartelera de película estándar */
-            background-color: var(--medium-grey);
+            background-color: var(--medium-grey); /* Definir --medium-grey en style.css */
             border-radius: 8px;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -89,8 +88,8 @@
         .genre-title {
             margin: 20px 10px 15px;
             font-size: 1.5em;
-            color: var(--text-color);
-            border-left: 4px solid var(--primary-color);
+            color: var(--text-color); /* Definir --text-color en style.css */
+            border-left: 4px solid var(--primary-color); /* Definir --primary-color en style.css */
             padding-left: 10px;
         }
         
@@ -135,7 +134,7 @@
         }
         
         .movie-quality {
-            background: var(--primary-color);
+            background: var(--primary-color); /* Definir --primary-color en style.css */
             padding: 2px 6px;
             border-radius: 3px;
         }
@@ -143,8 +142,7 @@
 </head>
 <body>
 
-    <div id="intro-animation" style="display: none;">
-        <div class="intro-logo-container">
+    <div id="intro-animation" style="display: none;"> <div class="intro-logo-container">
             <span class="intro-x">X</span><span class="intro-text">Pornitoo</span>
         </div>
     </div>
@@ -152,14 +150,14 @@
     <header>
         <div class="header-container">
             <a href="index.html" id="header-logo" class="logo">Pornitoo</a>
-             <div class="search-container">
-                 <input type="search" id="search-bar" data-translate-key="search_placeholder" placeholder="Buscar títulos...">
-                 <button id="search-button" data-translate-key="search_button"><i class="fas fa-search"></i></button>
-             </div>
+            <div class="search-container">
+                <input type="search" id="search-bar" data-translate-key="search_placeholder" placeholder="Buscar títulos...">
+                <button id="search-button" data-translate-key="search_button"><i class="fas fa-search"></i></button>
+            </div>
             <div class="header-actions">
-                 <button id="request-video-button" class="icon-button" data-tooltip="Sugerir Video" title="Sugerir Video" style="display: none;">
-                     <i class="fas fa-plus-circle"></i>
-                 </button>
+                <button id="request-video-button" class="icon-button" data-tooltip="Sugerir Video" title="Sugerir Video" style="display: none;">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
                 <button id="settings-button" class="icon-button" data-tooltip="Configuración" title="Configuración"><i class="fas fa-cog"></i></button>
                 <a href="chat.html" class="icon-button chat-icon-header" data-tooltip="Ir al Chat" title="Ir al Chat">
                     <i class="fas fa-comments"></i>
@@ -171,8 +169,7 @@
         </div>
     </header>
 
-    <div id="settings-panel" class="settings-panel">
-        <button id="close-settings-button" class="close-panel-button">×</button>
+    <div id="settings-panel" class="settings-panel"> <button id="close-settings-button" class="close-panel-button">×</button>
         <h4 data-translate-key="settings_title">Ajustes</h4>
 
         <div class="settings-section">
@@ -216,7 +213,7 @@
                 <label for="font-size-slider" data-translate-key="settings_font_size">Tamaño de Fuente Global:</label>
                 <input type="range" id="font-size-slider" data-setting="globalFontSize" min="80" max="120" value="100" step="5">
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <div>
                     <label class="switch">
                         <input type="checkbox" id="autoplay-videos" data-setting="autoplayVideos">
@@ -225,7 +222,7 @@
                     <label for="autoplay-videos" class="checkbox-label" data-translate-key="settings_autoplay">Autoplay Videos en Detalle</label>
                 </div>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <div>
                     <label class="switch">
                         <input type="checkbox" id="show-video-preview-on-hover" data-setting="showVideoPreviewOnHover" checked>
@@ -262,7 +259,7 @@
                         <input type="checkbox" id="loop-videos-by-default" data-setting="loopVideosByDefault">
                         <span class="slider round"></span>
                     </label>
-                     <label for="loop-videos-by-default" class="checkbox-label" data-translate-key="settings_loop_videos">Repetir Videos por Defecto</label>
+                    <label for="loop-videos-by-default" class="checkbox-label" data-translate-key="settings_loop_videos">Repetir Videos por Defecto</label>
                 </div>
             </div>
         </div>
@@ -300,11 +297,11 @@
                     <label for="show-online-status" class="checkbox-label" data-translate-key="settings_show_online">Mostrar Estado Online</label>
                 </div>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label for="search-history" data-translate-key="settings_clear_search">Historial de Búsqueda</label>
                 <button id="clear-search-history-btn" class="button-secondary small" data-translate-key="settings_clear_button">Limpiar</button>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <div>
                     <label class="switch">
                         <input type="checkbox" id="enable-mature-content-filter" data-setting="enableMatureContentFilter">
@@ -314,7 +311,7 @@
                 </div>
             </div>
         </div>
-         <div class="settings-section">
+        <div class="settings-section">
             <h5 data-translate-key="settings_accessibility">Accesibilidad (Simulado)</h5>
             <div class="form-group">
                 <div>
@@ -343,7 +340,7 @@
                 </select>
             </div>
         </div>
-         <div class="settings-section">
+        <div class="settings-section">
             <h5 data-translate-key="settings_data_usage">Uso de Datos (Simulado)</h5>
             <div class="form-group">
                 <div>
@@ -368,60 +365,117 @@
         <p style="opacity: 0.6; margin-top: 20px; text-align:center;" data-translate-key="settings_more_soon">(Más ajustes próximamente...)</p>
     </div>
 
-    <div id="login-modal" class="modal">
-         <div class="modal-content"><button class="close-modal" id="close-login-modal">×</button><h3 data-translate-key="login_modal_title">Iniciar Sesión / Registro</h3><form id="email-password-form"><div class="form-group"><label for="login-email" data-translate-key="login_email_label">Correo Electrónico</label><input type="email" id="login-email" required autocomplete="email"></div><div class="form-group"><label for="login-password" data-translate-key="login_password_label">Contraseña</label><input type="password" id="login-password" required autocomplete="current-password"></div><div class="form-error" id="login-error-message" style="display:none;"></div><div class="form-actions"><button type="button" class="button-secondary" id="signup-button" data-translate-key="login_signup_button">Registrarse</button><button type="button" class="button-primary" id="signin-button" data-translate-key="login_signin_button">Iniciar Sesión</button></div></form><div class="divider" data-translate-key="login_divider_or">O</div><button class="button-google" id="google-signin-button"><i class="fab fa-google"></i> <span data-translate-key="login_google_firebase">Continuar con Google</span></button><p class="modal-info-text" data-translate-key="login_modal_text_firebase">Regístrate o inicia sesión para acceder a todas las funciones.</p></div>
+    <div id="login-modal" class="modal"> <div class="modal-content">
+            <button class="close-modal" id="close-login-modal">×</button>
+            <h3 data-translate-key="login_modal_title">Iniciar Sesión / Registro</h3>
+            <form id="email-password-form">
+                <div class="form-group">
+                    <label for="login-email" data-translate-key="login_email_label">Correo Electrónico</label>
+                    <input type="email" id="login-email" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password" data-translate-key="login_password_label">Contraseña</label>
+                    <input type="password" id="login-password" required autocomplete="current-password">
+                </div>
+                <div class="form-error" id="login-error-message" style="display:none;"></div>
+                <div class="form-actions">
+                    <button type="button" class="button-secondary" id="signup-button" data-translate-key="login_signup_button">Registrarse</button>
+                    <button type="button" class="button-primary" id="signin-button" data-translate-key="login_signin_button">Iniciar Sesión</button>
+                </div>
+            </form>
+            <div class="divider" data-translate-key="login_divider_or">O</div>
+            <button class="button-google" id="google-signin-button">
+                <i class="fab fa-google"></i> <span data-translate-key="login_google_firebase">Continuar con Google</span>
+            </button>
+            <p class="modal-info-text" data-translate-key="login_modal_text_firebase">Regístrate o inicia sesión para acceder a todas las funciones.</p>
+        </div>
     </div>
 
     <main id="main-content">
         <div id="featured-carousel" class="featured-section">
-            <!-- Los destacados se cargarán aquí dinámicamente -->
-        </div>
+            </div>
         
         <h2 id="popular-title" data-translate-key="popular_title" class="section-title">Populares Ahora</h2>
         <div id="popular-container" class="genre-posters">
-            <!-- Los populares se cargarán aquí dinámicamente -->
-        </div>
+            </div>
         
         <div id="genres-container">
-            <!-- Las secciones de géneros se cargarán aquí dinámicamente -->
-        </div>
+            </div>
         
         <h2 data-translate-key="all_videos" class="section-title">Todos los Videos</h2>
         <div id="poster-container">
             <p id="loading-indicator" style="text-align: center; padding: 40px; color: var(--text-color-secondary);" data-translate-key="loading">Cargando...</p>
-        </div>
+            </div>
     </main>
 
-    <button id="admin-fab" class="floating-admin-button" title="Panel de Administrador" style="display: none;">
-        <i class="fas fa-shield-alt"></i>
+    <button id="admin-fab" class="floating-admin-button" title="Panel de Administrador" style="display: none;"> <i class="fas fa-shield-alt"></i>
     </button>
 
-    <div id="request-video-modal" class="modal">
-         <div class="modal-content">
-             <button class="close-modal" id="close-request-video-modal">×</button>
+    <div id="request-video-modal" class="modal"> <div class="modal-content">
+            <button class="close-modal" id="close-request-video-modal">×</button>
             <h3 data-translate-key="suggest_video_title">Sugerir un Video</h3>
             <form id="request-video-form">
-                 <div class="form-group"><label for="request-title" data-translate-key="request_title_label">Título del Video:</label><input type="text" id="request-title" required></div>
-                 <div class="form-group"><label for="request-url" data-translate-key="request_url_label">URL del Video (Opcional):</label><input type="url" id="request-url" data-translate-key="request_url_placeholder" placeholder="Enlace a YouTube, Vimeo, Drive, etc."></div>
-                 <div class="form-group"><label for="request-reason" data-translate-key="request_reason_label">Descripción o Razón:</label><textarea id="request-reason" rows="3" required data-translate-key="request_reason_placeholder" placeholder="¿Por qué deberíamos añadir este video?"></textarea></div>
-                 <button type="submit" id="submit-request-button" class="button-primary" data-translate-key="submit_suggestion_button">Enviar Sugerencia</button>
+                <div class="form-group">
+                    <label for="request-title" data-translate-key="request_title_label">Título del Video:</label>
+                    <input type="text" id="request-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="request-url" data-translate-key="request_url_label">URL del Video (Opcional):</label>
+                    <input type="url" id="request-url" data-translate-key="request_url_placeholder" placeholder="Enlace a YouTube, Vimeo, Drive, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="request-reason" data-translate-key="request_reason_label">Descripción o Razón:</label>
+                    <textarea id="request-reason" rows="3" required data-translate-key="request_reason_placeholder" placeholder="¿Por qué deberíamos añadir este video?"></textarea>
+                </div>
+                <button type="submit" id="submit-request-button" class="button-primary" data-translate-key="submit_suggestion_button">Enviar Sugerencia</button>
             </form>
-             <div id="request-video-status" class="admin-status"></div>
+            <div id="request-video-status" class="admin-status"></div>
         </div>
     </div>
 
     <footer>
         <p>&copy; <span id="current-year">2025</span> Pornitoo - Todos los derechos reservados.</p>
-    </footer>
+        </footer>
 
-    <div id="particles"></div>
-
-    <script type="module">
+    <div id="particles"></div> <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // IMPORTANTE: Reemplaza esto con tu configuración real de Firebase
+        // Es normal que esta configuración sea pública, pero asegura tus reglas de base de datos/storage.
         const firebaseConfig = {
-             apiKey: "AIzaSyAxmLKAoO5d0k0006h0LfIE0TXHFAw-3o0", authDomain: "pornitoo-ff650.firebaseapp.com", projectId: "pornitoo-ff650", storageBucket: "pornitoo-ff650.appspot.com", messagingSenderId: "91185468535", appId: "1:91185468535:web:598d7c22db95ca6b186272", measurementId: "G-65Z9T8PHB7", databaseURL: "https://pornitoo-ff650-default-rtdb.firebaseio.com"
+            apiKey: "AIzaSyAxmLKAoO5d0k0006h0LfIE0TXHFAw-3o0", // Ejemplo, usa tu API Key
+            authDomain: "pornitoo-ff650.firebaseapp.com",
+            projectId: "pornitoo-ff650",
+            storageBucket: "pornitoo-ff650.appspot.com",
+            messagingSenderId: "91185468535",
+            appId: "1:91185468535:web:598d7c22db95ca6b186272",
+            measurementId: "G-65Z9T8PHB7", // Opcional
+            databaseURL: "https://pornitoo-ff650-default-rtdb.firebaseio.com" // Si usas Realtime Database
         };
-        try { window.firebaseApp = initializeApp(firebaseConfig); console.log(`Firebase Initialized: ${window.location.pathname}`); document.dispatchEvent(new CustomEvent('firebase-ready')); } catch (e) { console.error("Firebase init failed:", e); const msg = `<div style="color:red;background:black;padding:20px;border:2px solid red;text-align:center;position:fixed;top:10px;left:10px;right:10px;z-index:9999;"><h1>Error Crítico</h1><p>Firebase init falló. Revisa consola.</p><p>${e.message}</p></div>`; if(document.body) document.body.insertAdjacentHTML('afterbegin', msg); else alert(`Firebase Error: ${e.message}`); throw e; }
+
+        try {
+            // Solo inicializa si no ha sido inicializado antes (por si este script se carga múltiples veces o hay HMR)
+            if (!window.firebaseApp) {
+                 window.firebaseApp = initializeApp(firebaseConfig);
+                 console.log(`Firebase Initialized: ${window.location.pathname}`);
+                 document.dispatchEvent(new CustomEvent('firebase-ready'));
+            }
+        } catch (e) {
+            console.error("Firebase init failed:", e);
+            const errorMsgHtml = `
+                <div style="color:red; background:black; padding:20px; border:2px solid red; text-align:center; position:fixed; top:10px; left:10px; right:10px; z-index:9999;">
+                    <h1>Error Crítico de Firebase</h1>
+                    <p>La inicialización de Firebase falló. Por favor, revisa la consola del navegador para más detalles.</p>
+                    <p>Mensaje: ${e.message}</p>
+                </div>`;
+            if (document.body) {
+                document.body.insertAdjacentHTML('afterbegin', errorMsgHtml);
+            } else {
+                // Fallback si el body aún no está listo (poco probable con script al final)
+                alert(`Error Crítico de Firebase: ${e.message}. Revisa la consola.`);
+            }
+            // Podrías querer detener la ejecución de otras funciones dependientes de Firebase aquí.
+            // throw e; // Opcional: relanzar el error si quieres que detenga otros scripts
+        }
     </script>
     <script type="module" src="script.js" defer></script>
 
@@ -437,107 +491,107 @@
             { id: 'scifi', name: 'Ciencia Ficción' },
             { id: 'thriller', name: 'Thriller' },
             { id: 'documentary', name: 'Documental' }
+            // Podrías añadir más géneros aquí si es necesario
         ];
         
-        // Variables de control
+        // Variables de control globales para los videos
         let allVideos = [];
-        let videosLoaded = false;
+        let videosLoaded = false; // Podría usarse para controlar la UI de carga
         
-        // Función para escanear la carpeta de videos
+        // Función para simular el escaneo de una carpeta de videos y generar datos
         async function scanVideoFolder() {
             try {
-                // Simulamos la carga de videos desde una carpeta
-                // En un entorno real, esto vendría de una API o Firebase
-                
-                // Eliminamos el indicador de carga
                 const loadingIndicator = document.getElementById('loading-indicator');
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
-                }
                 
-                // Simulamos 40 videos con datos aleatorios
+                // Simulación de 40 videos con datos aleatorios
                 const simulatedVideos = [];
                 for (let i = 0; i < 40; i++) {
-                    // Asignar géneros aleatorios (1-3 géneros por video)
                     const numGenres = Math.floor(Math.random() * 3) + 1;
-                    const videoGenres = [];
-                    
-                    for (let j = 0; j < numGenres; j++) {
+                    const videoGenresSet = new Set(); // Usar Set para evitar duplicados fácilmente
+                    while(videoGenresSet.size < numGenres && videoGenresSet.size < genres.length) {
                         const randomGenre = genres[Math.floor(Math.random() * genres.length)];
-                        if (!videoGenres.includes(randomGenre.id)) {
-                            videoGenres.push(randomGenre.id);
-                        }
+                        videoGenresSet.add(randomGenre.id);
                     }
+                    const videoGenres = Array.from(videoGenresSet);
                     
-                    // Duración aleatoria entre 1 y 120 minutos
-                    const durationMinutes = Math.floor(Math.random() * 120) + 1;
+                    const durationMinutes = Math.floor(Math.random() * 119) + 1; // 1 a 120 minutos
                     const hours = Math.floor(durationMinutes / 60);
                     const minutes = durationMinutes % 60;
-                    const durationFormatted = hours > 0 ? 
-                        `${hours}:${minutes.toString().padStart(2, '0')}` : 
-                        `${minutes}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
+                    const seconds = Math.floor(Math.random() * 60); // Añadir segundos para más realismo
                     
-                    // Calidad aleatoria
-                    const qualities = ['720p', '1080p', '4K'];
+                    let durationFormatted;
+                    if (hours > 0) {
+                        durationFormatted = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    } else {
+                        durationFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                    
+                    const qualities = ['720p', '1080p', '4K', 'HD'];
                     const randomQuality = qualities[Math.floor(Math.random() * qualities.length)];
                     
                     simulatedVideos.push({
-                        id: `video-${i + 1}`,
-                        title: `Película ${i + 1}`,
-                        filename: `pelicula_${i + 1}.mp4`,
-                        path: `Peliculas/pelicula_${i + 1}.mp4`,
-                        thumbnail: `/api/placeholder/300/450`,
+                        id: `video-${Date.now()}-${i + 1}`, // ID más único
+                        title: `Película de Ejemplo ${i + 1}`,
+                        filename: `pelicula_ejemplo_${i + 1}.mp4`, // Nombre de archivo genérico
+                        path: `Peliculas/pelicula_ejemplo_${i + 1}.mp4`, // Ruta simulada
+                        thumbnail: `/api/placeholder/300/450?text=Video+${i+1}`, // Placeholder con texto
                         duration: durationFormatted,
                         quality: randomQuality,
                         genres: videoGenres,
-                        views: Math.floor(Math.random() * 10000),
-                        uploadDate: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString()
+                        views: Math.floor(Math.random() * 100000), // Más vistas posibles
+                        uploadDate: new Date(Date.now() - Math.floor(Math.random() * 365) * 24 * 60 * 60 * 1000).toISOString() // Fechas de hasta un año atrás
                     });
                 }
                 
                 allVideos = simulatedVideos;
                 videosLoaded = true;
                 
-                // Una vez que tenemos los videos, generamos las carteleras y géneros
+                // Ocultar indicador de carga una vez que los datos simulados estén listos
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
+
+                // Generar contenido dinámico
+                generatePopularSection(); // Populares primero, suelen estar más arriba
                 generateGenreSections();
-                generateMoviePosters();
-                generatePopularSection();
+                generateMoviePosters(); // Para la sección "Todos los Videos"
                 
-                console.log(`Se cargaron ${allVideos.length} videos`);
+                console.log(`Se simularon y cargaron ${allVideos.length} videos.`);
                 
             } catch (error) {
-                console.error('Error al escanear la carpeta de videos:', error);
-                document.getElementById('loading-indicator').textContent = 'Error al cargar videos. Inténtalo de nuevo.';
+                console.error('Error al simular la carga de videos:', error);
+                const loadingIndicator = document.getElementById('loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.textContent = 'Error al cargar videos. Inténtalo de nuevo más tarde.';
+                    loadingIndicator.style.color = 'red';
+                }
             }
         }
         
-        // Función para generar las secciones de géneros
+        // Función para generar las secciones de géneros dinámicamente
         function generateGenreSections() {
             const genresContainer = document.getElementById('genres-container');
-            if (!genresContainer) return;
+            if (!genresContainer) {
+                console.warn('Contenedor de géneros (genres-container) no encontrado.');
+                return;
+            }
             
-            genresContainer.innerHTML = '';
+            genresContainer.innerHTML = ''; // Limpiar antes de añadir
             
             genres.forEach(genre => {
-                // Filtramos los videos que pertenecen a este género
-                const genreVideos = allVideos.filter(video => video.genres.includes(genre.id));
+                const genreVideos = allVideos.filter(video => video.genres && video.genres.includes(genre.id));
                 
-                // Solo creamos la sección si hay videos para este género
                 if (genreVideos.length > 0) {
                     const genreSection = document.createElement('div');
                     genreSection.className = 'genre-section';
                     genreSection.innerHTML = `
                         <h2 class="genre-title" data-genre="${genre.id}">${genre.name}</h2>
-                        <div class="genre-posters" id="genre-${genre.id}"></div>
+                        <div class="genre-posters" id="genre-posters-${genre.id}"></div>
                     `;
-                    
                     genresContainer.appendChild(genreSection);
                     
-                    // Ahora añadimos los videos a esta sección de género
-                    const genrePostersContainer = document.getElementById(`genre-${genre.id}`);
-                    
-                    // Mostramos solo 6 videos por género (o menos si no hay suficientes)
-                    const videosToShow = genreVideos.slice(0, 6);
+                    const genrePostersContainer = document.getElementById(`genre-posters-${genre.id}`);
+                    const videosToShow = genreVideos.sort((a,b) => b.views - a.views).slice(0, 6); // Mostrar los 6 más populares de ese género
                     
                     videosToShow.forEach(video => {
                         const movieElement = createMoviePosterElement(video);
@@ -547,181 +601,191 @@
             });
         }
         
-        // Función para generar la sección de populares
+        // Función para generar la sección de videos populares
         function generatePopularSection() {
             const popularContainer = document.getElementById('popular-container');
-            if (!popularContainer) return;
+            if (!popularContainer) {
+                console.warn('Contenedor de populares (popular-container) no encontrado.');
+                return;
+            }
             
-            popularContainer.innerHTML = '';
+            popularContainer.innerHTML = ''; // Limpiar
             
-            // Ordenamos los videos por número de vistas (descendente)
+            // Ordenar videos por vistas y tomar los primeros 6 (o menos si no hay suficientes)
             const popularVideos = [...allVideos].sort((a, b) => b.views - a.views).slice(0, 6);
             
+            if (popularVideos.length === 0 && videosLoaded) {
+                popularContainer.innerHTML = '<p style="color: var(--text-color-secondary); padding: 10px;">No hay videos populares por el momento.</p>';
+                return;
+            }
+
             popularVideos.forEach(video => {
                 const movieElement = createMoviePosterElement(video);
                 popularContainer.appendChild(movieElement);
             });
         }
         
-        // Función para crear un elemento de cartelera de película
+        // Función para crear un elemento de cartelera de película HTML
         function createMoviePosterElement(video) {
             const movieElement = document.createElement('div');
             movieElement.className = 'movie-poster';
             movieElement.dataset.videoId = video.id;
-            movieElement.dataset.videoPath = video.path;
-            
-            // Extraer formato/extensión del archivo
-            const fileExtension = video.filename.split('.').pop().toLowerCase();
-            
+            // movieElement.dataset.videoPath = video.path; // Puede ser útil para debugging o futuras funciones
+
+            // Placeholder para la imagen si no hay thumbnail real
+            const imgSrc = video.thumbnail || `https://via.placeholder.com/300x450.png?text=${encodeURIComponent(video.title)}`;
+
             movieElement.innerHTML = `
                 <div class="movie-info">
-                    <span class="movie-duration">${video.duration}</span>
-                    <span class="movie-quality">${video.quality}</span>
+                    <span class="movie-duration">${video.duration || 'N/A'}</span>
+                    <span class="movie-quality">${video.quality || 'SD'}</span>
                 </div>
-                <img src="${video.thumbnail}" alt="${video.title}" loading="lazy">
-                <div class="movie-title">${video.title}</div>
+                <img src="${imgSrc}" alt="Cartel de ${video.title}" loading="lazy">
+                <div class="movie-title" title="${video.title}">${video.title}</div>
             `;
             
-            // Añadir evento click para redirigir a detail.html con el ID del video
             movieElement.addEventListener('click', () => {
-                window.location.href = `detail.html?id=${video.id}`;
+                // Idealmente, esta URL se construiría de forma más robusta
+                window.location.href = `detail.html?id=${encodeURIComponent(video.id)}`;
             });
             
             return movieElement;
         }
         
-        // Función para generar todas las carteleras en la sección principal
-        function generateMoviePosters() {
+        // Función para generar todas las carteleras en la sección principal "Todos los Videos"
+        function generateMoviePosters(videosToDisplay = allVideos) {
             const posterContainer = document.getElementById('poster-container');
             if (!posterContainer) {
-                console.error('El contenedor de posters no fue encontrado.');
+                console.error('El contenedor de posters principal (poster-container) no fue encontrado.');
                 return;
             }
             
-            // Limpiar el contenedor
-            posterContainer.innerHTML = '';
+            posterContainer.innerHTML = ''; // Limpiar el contenedor
             
-            // Generar carteleras para todos los videos
-            allVideos.forEach(video => {
+            if (videosToDisplay.length === 0 && videosLoaded) {
+                posterContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-color-secondary);">
+                        <i class="fas fa-film fa-3x" style="margin-bottom: 10px;"></i>
+                        <p>No hay videos disponibles en este momento.</p>
+                    </div>`;
+                return;
+            }
+
+            videosToDisplay.forEach(video => {
                 const movieElement = createMoviePosterElement(video);
                 posterContainer.appendChild(movieElement);
             });
         }
         
-        // Función para cargar los videos desde la carpeta "Peliculas"
+        // Función principal para cargar (simular) videos desde una "carpeta"
         function loadVideosFromFolder() {
-            // En un entorno real, aquí se haría una solicitud AJAX a un script del servidor
-            // que escanearía la carpeta "Peliculas" y devolvería la lista de archivos
-            // Para esta demostración, simularemos este proceso
+            console.log("Iniciando simulación de escaneo de carpeta 'Peliculas'...");
             
-            console.log("Iniciando escaneo de carpeta Peliculas...");
-            
-            // Simular un tiempo de carga
+            // Simular un tiempo de carga de red o procesamiento
             setTimeout(() => {
-                scanVideoFolder();
-            }, 1000);
+                scanVideoFolder(); // Esta función ahora también llama a las funciones de renderizado
+            }, 1200); // Un poco más de tiempo para que parezca más real
         }
 
-        // Función para extraer el thumbnail de un video (simulado)
-        async function extractThumbnail(videoPath) {
-            // En un entorno real, esto requeriría un proceso de servidor para extraer
-            // un frame del video como thumbnail
-            // Para esta demostración, simplemente devolvemos una URL de placeholder
-            return `/api/placeholder/300/450`;
-        }
-        
-        // Función para buscar videos
+        // Función para buscar videos por título
         function searchVideos(query) {
-            if (!query || query.trim() === '') {
-                // Si la búsqueda está vacía, mostrar todos los videos
-                generateMoviePosters();
+            const normalizedQuery = query.toLowerCase().trim();
+            
+            if (!normalizedQuery) {
+                generateMoviePosters(allVideos); // Mostrar todos si la búsqueda está vacía
                 return;
             }
             
-            query = query.toLowerCase().trim();
-            
-            // Filtrar videos que coincidan con la búsqueda
             const filteredVideos = allVideos.filter(video => 
-                video.title.toLowerCase().includes(query)
+                video.title.toLowerCase().includes(normalizedQuery) ||
+                (video.genres && video.genres.some(genreId => {
+                    const genreObj = genres.find(g => g.id === genreId);
+                    return genreObj && genreObj.name.toLowerCase().includes(normalizedQuery);
+                }))
             );
             
-            // Mostrar los resultados en el contenedor
-            const posterContainer = document.getElementById('poster-container');
-            if (!posterContainer) return;
-            
-            posterContainer.innerHTML = '';
-            
+            const posterContainer = document.getElementById('poster-container'); // Asumiendo que los resultados de búsqueda se muestran aquí
+             if (!posterContainer) {
+                console.error('Contenedor para resultados de búsqueda no encontrado.');
+                return;
+            }
+            posterContainer.innerHTML = ''; // Limpiar antes de mostrar resultados
+
             if (filteredVideos.length === 0) {
                 posterContainer.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: var(--text-color-secondary);">
                         <i class="fas fa-search fa-3x" style="margin-bottom: 10px;"></i>
-                        <p>No se encontraron resultados para "${query}"</p>
-                    </div>
-                `;
-                return;
+                        <p>No se encontraron resultados para "<span style="font-weight:bold;">${query}</span>".</p>
+                        <p>Intenta con otros términos de búsqueda.</p>
+                    </div>`;
+            } else {
+                generateMoviePosters(filteredVideos); // Mostrar solo los videos filtrados
             }
-            
-            filteredVideos.forEach(video => {
-                const movieElement = createMoviePosterElement(video);
-                posterContainer.appendChild(movieElement);
-            });
         }
         
-        // Manejador de eventos para la búsqueda
+        // Manejador de eventos para la barra de búsqueda
         function initSearchBar() {
             const searchBar = document.getElementById('search-bar');
             const searchButton = document.getElementById('search-button');
             
-            if (!searchBar || !searchButton) return;
+            if (!searchBar || !searchButton) {
+                console.warn('Barra de búsqueda o botón no encontrados.');
+                return;
+            }
             
-            searchButton.addEventListener('click', () => {
+            const performSearch = () => {
                 searchVideos(searchBar.value);
-            });
+                 // Opcional: Ocultar secciones de géneros y populares al buscar.
+                document.getElementById('genres-container').style.display = searchBar.value.trim() === '' ? 'block' : 'none';
+                document.getElementById('popular-container').style.display = searchBar.value.trim() === '' ? 'block' : 'none';
+                document.getElementById('popular-title').style.display = searchBar.value.trim() === '' ? 'block' : 'none';
+            };
+
+            searchButton.addEventListener('click', performSearch);
             
             searchBar.addEventListener('keypress', (event) => {
                 if (event.key === 'Enter') {
-                    searchVideos(searchBar.value);
+                    performSearch();
+                }
+            });
+            searchBar.addEventListener('input', () => { // Búsqueda en tiempo real o al borrar
+                if (searchBar.value.trim() === '') {
+                    performSearch(); // Para restaurar la vista completa
                 }
             });
         }
         
-        // Función para inicializar
-        function initialize() {
-            console.log("Inicializando Pornitoo...");
+        // Función de inicialización de la página
+        function initializePage() {
+            console.log("Inicializando la página Pornitoo...");
             
-            // Inicializar barra de búsqueda
             initSearchBar();
+            loadVideosFromFolder(); // Esto iniciará la carga (simulada) y el renderizado
             
-            // Cargar videos
-            loadVideosFromFolder();
-            
-            // Actualizar el año actual en el footer
             const currentYearSpan = document.getElementById('current-year');
             if (currentYearSpan) {
                 currentYearSpan.textContent = new Date().getFullYear();
             }
+
+            // Más inicializaciones (event listeners para settings, modales, etc.)
+            // probablemente estén en script.js o deberían estarlo.
         }
 
-        // Llamar a la función cuando el documento esté cargado
-        document.addEventListener('DOMContentLoaded', initialize);
+        // Event Listener para iniciar todo cuando el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', initializePage);
         
-        // Detectar cambios en el tamaño de la ventana para ajustar la visualización
+        // Detectar cambios en el tamaño de la ventana (ejemplo, podría no ser necesario aquí)
         window.addEventListener('resize', () => {
-            // Puedes agregar lógica adicional para ajustar la visualización si es necesario
+            // console.log("Ventana redimensionada. Podrías re-renderizar si es necesario.");
+            // Por ejemplo, si usas una librería de carrusel que necesite recalcular dimensiones.
         });
         
         // Detectar si el usuario está en un dispositivo móvil
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
             document.body.classList.add('mobile-device');
-            console.log("Dispositivo móvil detectado, ajustando interfaz...");
+            console.log("Dispositivo móvil detectado. Se añadió la clase 'mobile-device' al body.");
         }
-         });
-
-    </script>
-
-
-
+    </script>
 </body>
-
 </html>
