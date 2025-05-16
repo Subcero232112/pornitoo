@@ -386,14 +386,13 @@
             posterContainer.innerHTML = ''; 
             
             // Generar 40 películas de ejemplo
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 400; i++) {
                 const movieElement = document.createElement('div');
                 movieElement.className = 'movie-poster';
                 
                 // Usar data-translate-key si se quiere traducir "Película"
                 // Aquí se usa un título genérico, ajustar si es necesario para traducción
                 movieElement.innerHTML = `
-                    <img src="https://picsum.photos/400/400?random=${i + 1}" alt="Película ${i + 1}">
                     <div class="movie-title">Película ${i + 1}</div>
                 `;
                 
