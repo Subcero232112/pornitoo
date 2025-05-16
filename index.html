@@ -8,20 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
-        /* Estilos adicionales específicos para esta página si son necesarios */
-        .poster {
-            aspect-ratio: 1 / 1; /* Hace el poster cuadrado */
+        /* Estilos del HTML 1: Poster individual (puede o no ser usado ahora) y Ajustes */
+        .poster { /* Si se usa para un poster destacado individual */
+            aspect-ratio: 1 / 1;
         }
         .poster img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Asegura que la imagen cubra el área cuadrada */
+            object-fit: cover;
         }
-        /* Nuevas opciones de ajustes */
+
+        /* Estilos para el panel de ajustes */
         .settings-section .form-group {
             margin-bottom: 15px;
         }
-        .settings-section .form-group label:not(.checkbox-label):not(.switch) { /* No aplicar a labels de toggles */
+        .settings-section .form-group label:not(.checkbox-label):not(.switch) {
             display: block;
             margin-bottom: 5px;
             color: var(--text-color-secondary);
@@ -29,7 +30,7 @@
         }
         .settings-section .form-group input[type="range"],
         .settings-section .form-group select,
-        .settings-section .form-group input[type="text"] { /* Quitar checkbox de aquí */
+        .settings-section .form-group input[type="text"] {
             width: 100%;
             padding: 8px;
             background-color: var(--medium-grey);
@@ -37,7 +38,6 @@
             color: var(--text-color);
             border-radius: var(--border-radius-small);
         }
-         /* Estilos para el toggle switch (ya deberían estar en style.css global, pero por si acaso) */
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--medium-grey); transition: .4s; border: 1px solid var(--light-grey); }
@@ -46,16 +46,60 @@
         input:checked + .slider:before { transform: translateX(24px); }
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
-
-        .settings-section .checkbox-label { /* Para el texto al lado del toggle */
+        .settings-section .checkbox-label {
             vertical-align: middle;
             font-size: 0.95em;
-            margin-left: 8px; /* Espacio después del toggle */
+            margin-left: 8px;
             color: var(--text-color);
         }
-        .settings-section .form-group div { /* Para alinear el toggle y su label */
+        .settings-section .form-group div {
             display: flex;
             align-items: center;
+        }
+
+        /* Estilos del HTML 2: Contenedor de grid de carteleras y carteleras individuales */
+        #poster-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px; /* Reducido de 16px a 8px como en el HTML2 original */
+            padding: 16px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .movie-poster { /* Estilo para cada cartelera en el grid */
+            position: relative;
+            aspect-ratio: 1 / 1;
+            background-color: var(--medium-grey);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .movie-poster:hover {
+            transform: scale(1.02);
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .movie-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
@@ -84,7 +128,7 @@
                 </a>
                 <button id="user-auth-button" class="icon-button" data-tooltip="Iniciar Sesión" title="Iniciar Sesión">
                     <i class="fas fa-user"></i>
-                    </button>
+                </button>
             </div>
         </div>
     </header>
@@ -185,7 +229,6 @@
             </div>
         </div>
 
-
         <div class="settings-section">
             <h5 data-translate-key="settings_notifications">Notificaciones (Simulado)</h5>
             <div class="form-group">
@@ -284,7 +327,6 @@
             </div>
         </div>
 
-
         <p style="opacity: 0.6; margin-top: 20px; text-align:center;" data-translate-key="settings_more_soon">(Más ajustes próximamente...)</p>
     </div>
 
@@ -331,6 +373,56 @@
         try { window.firebaseApp = initializeApp(firebaseConfig); console.log(`Firebase Initialized: ${window.location.pathname}`); document.dispatchEvent(new CustomEvent('firebase-ready')); } catch (e) { console.error("Firebase init failed:", e); const msg = `<div style="color:red;background:black;padding:20px;border:2px solid red;text-align:center;position:fixed;top:10px;left:10px;right:10px;z-index:9999;"><h1>Error Crítico</h1><p>Firebase init falló. Revisa consola.</p><p>${e.message}</p></div>`; if(document.body) document.body.insertAdjacentHTML('afterbegin', msg); else alert(`Firebase Error: ${e.message}`); throw e; }
     </script>
     <script type="module" src="script.js" defer></script>
+
+    <script>
+        // Función para generar las carteleras (del HTML 2)
+        function generateMoviePosters() {
+            const posterContainer = document.getElementById('poster-container');
+            if (!posterContainer) {
+                console.error('El contenedor de posters no fue encontrado.');
+                return;
+            }
+            // Limpiar el contenedor (incluyendo el indicador de carga)
+            posterContainer.innerHTML = ''; 
+            
+            // Generar 40 películas de ejemplo
+            for (let i = 0; i < 40; i++) {
+                const movieElement = document.createElement('div');
+                movieElement.className = 'movie-poster';
+                
+                // Usar data-translate-key si se quiere traducir "Película"
+                // Aquí se usa un título genérico, ajustar si es necesario para traducción
+                movieElement.innerHTML = `
+                    <img src="https://picsum.photos/400/400?random=${i + 1}" alt="Película ${i + 1}">
+                    <div class="movie-title">Película ${i + 1}</div>
+                `;
+                
+                // Agregar evento click (ejemplo)
+                movieElement.addEventListener('click', () => {
+                    // Aquí puedes agregar la lógica para cuando se hace clic en una película
+                    // Por ejemplo, redirigir a una página de detalles o abrir un modal.
+                    console.log(`Película ${i + 1} clickeada`);
+                    // alert(`Has hecho clic en Película ${i + 1}`); // Descomentar para prueba rápida
+                });
+
+                posterContainer.appendChild(movieElement);
+            }
+        }
+
+        // Llamar a la función cuando el documento esté cargado
+        // Si script.js también maneja la carga de posters (ej. desde Firebase),
+        // esta llamada podría necesitar ser condicional o integrada en script.js.
+        document.addEventListener('DOMContentLoaded', () => {
+            generateMoviePosters();
+
+            // Actualizar el año actual en el footer (del HTML 2)
+            // Si script.js ya hace esto, esta línea es redundante.
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+            }
+        });
+    </script>
 
 </body>
 </html>
