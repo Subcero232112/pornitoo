@@ -486,11 +486,11 @@
             { id: 'adventure', name: 'Familiar' },
             { id: 'comedy', name: 'Polla Grande' },
             { id: 'drama', name: 'Virgenes' },
-            { id: 'horror', name: 'Harcore' },
+            { id: 'horror', name: 'Lesbianas' },
             { id: 'romance', name: 'Asians' },
             { id: 'scifi', name: 'Madrastra' },
             { id: 'thriller', name: 'Clasico' },
-            { id: 'documentary', name: 'Morboso' }
+            { id: 'documentary', name: 'Harcore' }
             // Podrías añadir más géneros aquí si es necesario
         ];
         
@@ -505,7 +505,7 @@
                 
                 // Simulación de 40 videos con datos aleatorios
                 const simulatedVideos = [];
-                for (let i = 0; i < 40; i++) {
+                for (let i = 0; i < 4000; i++) {
                     const numGenres = Math.floor(Math.random() * 3) + 1;
                     const videoGenresSet = new Set(); // Usar Set para evitar duplicados fácilmente
                     while(videoGenresSet.size < numGenres && videoGenresSet.size < genres.length) {
